@@ -1,0 +1,5 @@
+#!/bin/bash
+
+sudo cp rc/hosts-protect /etc/cron.hourly/
+sudo cp bin/hosts-monitor /usr/local/bin/
+echo "Setup successfully!"
