@@ -39,7 +39,7 @@ $ hosts-monitor ban --help
 
 ```sh
 $ sudo hosts-monitor service stop       # stop hosts-protect
-$ sudo hosts-monitor service restart    # stop hosts-protect and show the current report
+$ sudo hosts-monitor service restart    # start hosts-protect and show the current report
 $ hosts-monitor service --help
 ```
 
