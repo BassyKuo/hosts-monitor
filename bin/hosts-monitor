@@ -81,17 +81,21 @@ check_ip() {
 		(errmsg "error ip format!"; return 1)
 }
 update_repo() {
+    tmp="$shortrepo.tmp"
 	sed -i '$d' $shortrepo
+	( ( \
+    cat $shortrepo;
 	echo $@ | \
 		awk -v "format=$SUFFIX_FORMAT" \
-			'NF>0  { printf format, $1, $2, $3, $4, "*", $6, $7 }' | tee -a $shortrepo >> $report
-	cat $shortrepo | column -t -s'   ' > $shortrepo
+            'NF>0  { printf format, $1, $2, $3, $4, "*", $6, $7 }' | tee -a $report \
+	) | column -t -s' ';
 	echo "$FOOTER" | wc -L | \
 		awk -v "len=$LINE_LENGTH" -v "footer=$FOOTER" \
 			'{ for(i=1;i<=(len-$1)/2;i++) printf "-"; }
 			{ printf "%s", footer }
-			{ for(i=1;i<=(len-$1)/2;i++) printf "-"; printf "\n" }' | tee -a $shortrepo > /dev/null
-	cat $shortrepo
+			{ for(i=1;i<=(len-$1)/2;i++) printf "-"; printf "\n" }' \
+    ) | tee $tmp
+    mv $tmp $shortrepo
 }
 ban_ip() {
 	IP=$1
