@@ -9,7 +9,7 @@ The light service to manage suspicious hosts.  This repository contains:
     * Default shortcut: `/etc/ssh/sshd_banner`
 
 * **hosts-monitor** : 
-    user command to easily list/search log in hosts-monitor.report, ban/unban specific ips manually (root only), and control `hosts-protect` service to ON/OFF.
+    user command to easily list/search log in hosts-monitor.report, ban/unban specific ips manually (root only), and control `hosts-protect` service to ON/OFF (root only).
 
 ## Setup
 
@@ -30,7 +30,7 @@ $ hosts-monitor list --help
 
 ```sh
 $ sudo hosts-monitor ban 1.1.1.1    # add 1.1.1.1 into /etc/hosts.deny
-$ sudo hosts-monitor ban 1.1.1.1 2.2.2.2   # enable to receive multi-ips
+$ sudo hosts-monitor ban 1.1.1.1 2.2.2.2   # allow to input multiple ips
 $ sudo hosts-monitor unban 2.2.2.2  # remove 2.2.2.2 from /etc/hosts.deny
 $ hosts-monitor ban --help
 ```
@@ -38,8 +38,8 @@ $ hosts-monitor ban --help
    3. control `hosts-protect` [root only]
 
 ```sh
-$ sudo hosts-monitor service stop       # stop hosts-protect
-$ sudo hosts-monitor service restart    # start hosts-protect and show the current report
+$ sudo hosts-monitor service stop       # disable hosts-protect
+$ sudo hosts-monitor service restart    # enable hosts-protect and run it
 $ hosts-monitor service --help
 ```
 

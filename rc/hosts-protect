@@ -5,6 +5,16 @@
 
 # ==== /etc/crond.hourly/hosts-protect @ 2018/1/16 by Bass <aaammmyyy27@gmail.com> ====
 
+PROG=$(echo $0 | awk -F'/' '{print $NF}')
+SUFFIX_FORMAT="%-12s %-10s %-14s %-18s %-15s %-16s %-5s\n"
+LINE_LENGTH=98
+FOOTER="[ $(date '+%F %R') FOUND ]"
+TIME=$(date '+%F %T')
+USER_NAME=$(who -m | awk '{print $1}')
+
+hosts_deny=/etc/hosts.deny
+report=/home/hosts-monitor.report
+shortrepo=/etc/ssh/sshd_banner
 Date=$(date -d "1 hour ago" '+%h %e %H %F %u')
 set $Date
 M=$1
@@ -12,9 +22,21 @@ d=$2
 h=$3
 F=$4
 week=$5
-hosts_deny=/etc/hosts.deny
-report=/home/hosts-monitor.report
-shortrepo=/etc/ssh/sshd_banner
+
+print_header() {
+    echo "" | \
+        awk	-v "format=$SUFFIX_FORMAT" -v "len=$LINE_LENGTH" \
+            'BEGIN { for(i=1;i<=len;i++) printf "-"; printf "\n" }
+            BEGIN { printf format, "Date", "Time", "Service", "Event", "UserID", "IP", "Status" }
+            BEGIN { for(i=1;i<=len;i++) printf "-"; printf "\n" }'
+}
+print_footer() {
+	echo "$FOOTER" | wc -L | \
+		awk -v "len=$LINE_LENGTH" -v "footer=$FOOTER" \
+			'{ for(i=1;i<=(len-$1)/2;i++) printf "-"; }
+			{ printf "%s", footer }
+			{ for(i=1;i<=(len-$1)/2;i++) printf "-"; printf "\n" }'
+}
 
 # [Back-up]
 #   at Monday 01:00
@@ -23,7 +45,7 @@ if [ $week -eq 1 ] && [ $h -eq 0 ]; then
 		mv $report.$i $report.$(($i+1))
 	done
 	mv $report $report.1
-	touch $report
+    print_header >> $report
 fi
 
 # [hosts.deny]
@@ -45,17 +67,10 @@ echo "$ban_ip" | tr ' ' '\n' | awk 'NF>0{print "ALL: "$1}' >> $hosts_deny
 
 # [hosts-monitor.report]
 # --- The whole report saved in /home/hosts-monitor.report [default]
-SUFFIX_FORMAT="%-12s %-10s %-14s %-18s %-15s %-16s %-5s\n"
-LINE_LENGTH=98
-echo "" | \
-    awk	-v "format=$SUFFIX_FORMAT" -v "len=$LINE_LENGTH" \
-        'BEGIN { for(i=1;i<=len;i++) printf "-"; printf "\n" }
-        BEGIN { printf format, "Date", "Time", "Service", "Event", "UserID", "IP", "Status" }
-        BEGIN { for(i=1;i<=len;i++) printf "-"; printf "\n" }' >> $report
 echo "$warning$brute_force" | tr ';' '\n' | sort | \
     awk -v "ban_ip=$ban_ip" -v "format=$SUFFIX_FORMAT" \
-        'NF>0  { if(index(ban_ip, $7)) $8="Ban";
-                printf format, $1, $2, $3, $4, $5, $6, $7, $8 }' >> $report
+        'NF>0  { if(index(ban_ip, $6)) $7="Ban";
+                printf format, $1, $2, $3, $4, $5, $6, $7 }' >> $report
 
 # --- The short report saved in /etc/ssh/sshd_banner [default] synchronously
 #     (To preview before login, add `Banner /etc/ssh/sshd_banner` into /etc/ssh/sshd_config)
@@ -63,5 +78,6 @@ echo "$warning$brute_force" | tr ';' '\n' | sort | \
  echo "$warning$brute_force" | tr ';' '\n' | sort | \
 	awk -v "ban_ip=$ban_ip" \
 		'NF>0  { if(index(ban_ip, $6)) $0=$0" Ban"; print $0 }') | column -t -s' ' | sed '1 s/\(^.*$\)/\1  /' | tee $shortrepo > /dev/null
+print_footer | tee -a $shortrepo > /dev/null
 
 
