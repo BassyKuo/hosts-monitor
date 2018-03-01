@@ -10,6 +10,9 @@ The light service to manage suspicious hosts.  This repository contains:
 
 * **hosts-monitor** : 
     user command to easily list/search log in hosts-monitor.report, ban/unban specific ips manually (root only), and control `hosts-protect` service to ON/OFF (root only).
+    
+    * log path: `/home/hosts-monitor.report` 
+    * ban-list: `/etc/hosts.deny` (the only ban-list accessed.  If you unban unsuccessfully, check whether another ban-list is running or not.)
 
 ## Setup
 
