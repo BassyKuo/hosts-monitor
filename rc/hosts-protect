@@ -8,7 +8,7 @@
 PROG=$(echo $0 | awk -F'/' '{print $NF}')
 SUFFIX_FORMAT="%-12s %-10s %-14s %-18s %-15s %-16s %-5s\n"
 LINE_LENGTH=98
-FOOTER="[ $(date '+%F %R') FOUND ]"
+FOOTER="[ $(date '+%F %R') UPDATE ]"
 TIME=$(date '+%F %T')
 USER_NAME=$(who -m | awk '{print $1}')
 
@@ -25,26 +25,26 @@ week=$5
 
 print_header() {
     echo "" | \
-        awk	-v "format=$SUFFIX_FORMAT" -v "len=$LINE_LENGTH" \
+        awk    -v "format=$SUFFIX_FORMAT" -v "len=$LINE_LENGTH" \
             'BEGIN { for(i=1;i<=len;i++) printf "-"; printf "\n" }
             BEGIN { printf format, "Date", "Time", "Service", "Event", "UserID", "IP", "Status" }
             BEGIN { for(i=1;i<=len;i++) printf "-"; printf "\n" }'
 }
 print_footer() {
-	echo "$FOOTER" | wc -L | \
-		awk -v "len=$LINE_LENGTH" -v "footer=$FOOTER" \
-			'{ for(i=1;i<=(len-$1)/2;i++) printf "-"; }
-			{ printf "%s", footer }
-			{ for(i=1;i<=(len-$1)/2;i++) printf "-"; printf "\n" }'
+    echo "$FOOTER" | wc -L | \
+        awk -v "len=$LINE_LENGTH" -v "footer=$FOOTER" \
+            '{ for(i=1;i<=(len-$1)/2;i++) printf "-"; }
+            { printf "%s", footer }
+            { for(i=1;i<=(len-$1)/2;i++) printf "-"; printf "\n" }'
 }
 
 # [Back-up]
 #   at Monday 01:00
 if [ $week -eq 1 ] && [ $h -eq 0 ]; then
-	for i in $(seq 3 -1 1); do
-		mv $report.$i $report.$(($i+1))
-	done
-	mv $report $report.1
+    for i in $(seq 3 -1 1); do
+        mv $report.$i $report.$(($i+1))
+    done
+    mv $report $report.1
     print_header >> $report
 fi
 
@@ -52,9 +52,9 @@ fi
 # (1) from /var/log/auth.log*
 # --- invalid users & failed password users
 warning=$(zgrep "^${M}\s\+${d}\s\+${h}:.* Invalid user .*[0-9]$" /var/log/auth.log* | \
-	awk '{print "'${F}' "$3" sshd Invalid-User "$8" "$10";"}')
+    awk '{print "'${F}' "$3" sshd Invalid-User "$8" "$10";"}')
 brute_force=$(zgrep "^${M}\s\+${d}\s\+${h}:.* pam_unix(sshd:auth):.* rhost=[0-9\.]\+  user=" /var/log/auth.log* | \
-	awk '{print "'${F}' "$3" sshd Failed-Password "$15" "$14";"}' | sed -e 's/user=//g;s/rhost=//g')
+    awk '{print "'${F}' "$3" sshd Failed-Password "$15" "$14";"}' | sed -e 's/user=//g;s/rhost=//g')
 # (2) from /var/log/fail2ban.log*
 fail2ban_ip=$(zgrep "${F}\s\+${h}:.* Ban" /var/log/fail2ban.log* | awk 'NF>0{print $8}')
 
@@ -77,8 +77,6 @@ echo "$warning$brute_force" | tr ';' '\n' | sort | \
 #     (To preview before login, add `Banner /etc/ssh/sshd_banner` into /etc/ssh/sshd_config)
 (echo "Date Time Service Event UserID IP Status" ; 
  echo "$warning$brute_force" | tr ';' '\n' | sort | \
-	awk -v "ban_ip=$ban_ip" \
-		'NF>0  { if(index(ban_ip, $6)) $0=$0" Ban"; print $0 }') | column -t -s' ' | sed '1 s/\(^.*$\)/\1  /' | tee $shortrepo > /dev/null
-print_footer | tee -a $shortrepo > /dev/null
-
-
+    awk -v "ban_ip=$ban_ip" \
+        'NF>0  { if(index(ban_ip, $6)) $0=$0" Ban"; print $0 }') | column -t -s' ' | sed '1 s/\(^.*$\)/\1  /' | tee $shortrepo > /dev/null
+#print_footer | tee -a $shortrepo > /dev/null
