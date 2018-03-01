@@ -67,6 +67,7 @@ echo "$ban_ip" | tr ' ' '\n' | awk 'NF>0{print "ALL: "$1}' >> $hosts_deny
 
 # [hosts-monitor.report]
 # --- The whole report saved in /home/hosts-monitor.report [default]
+test -f $report || print_header >> $report
 echo "$warning$brute_force" | tr ';' '\n' | sort | \
     awk -v "ban_ip=$ban_ip" -v "format=$SUFFIX_FORMAT" \
         'NF>0  { if(index(ban_ip, $6)) $7="Ban";
