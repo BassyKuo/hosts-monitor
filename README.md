@@ -47,3 +47,9 @@ $ hosts-monitor service --help
 ```
 
 Type `hosts-monitor help` to see the detailed description.
+
+
+## TODO
+- [ ] Merge hosts-monitor & hosts-protect (saved in `/dev/hosts-monitor`)
+- [ ] Ban-Rule add: username
+- [ ] Always-Allow: ip @ /etc/hosts.allow
