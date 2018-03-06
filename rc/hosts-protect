@@ -25,7 +25,7 @@ week=$5
 
 print_header() {
     echo "" | \
-        awk    -v "format=$SUFFIX_FORMAT" -v "len=$LINE_LENGTH" \
+        awk -v "format=$SUFFIX_FORMAT" -v "len=$LINE_LENGTH" \
             'BEGIN { for(i=1;i<=len;i++) printf "-"; printf "\n" }
             BEGIN { printf format, "Date", "Time", "Service", "Event", "UserID", "IP", "Status" }
             BEGIN { for(i=1;i<=len;i++) printf "-"; printf "\n" }'
@@ -45,7 +45,6 @@ if [ $week -eq 1 ] && [ $h -eq 0 ]; then
         mv $report.$i $report.$(($i+1))
     done
     mv $report $report.1
-    print_header >> $report
 fi
 
 # [hosts.deny]
