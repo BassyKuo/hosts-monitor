@@ -1,9 +1,9 @@
 #!/bin/bash
 
-INSTALL_DIR=/opt
+INSTALL_DIR=/opt/hosts-monitor
 
-echo ">>> Install hosts-monitor in $INSTALL_DIR..."
+echo -e "\033[33m>>> Install hosts-monitor in $INSTALL_DIR...\033[0m"
 sudo cp -r ../hosts-monitor $INSTALL_DIR
 sudo ln -s $INSTALL_DIR/bin/hosts-monitor /usr/local/bin/hosts-monitor
-sudo ln -s $INSTALL_DIR/rc/hosts-protect  /etc/cron.hourly/
-echo "Setup successfully!"
+sudo ln -s $INSTALL_DIR/rc/hosts-protect  /etc/cron.hourly/hosts-protect
+echo -e "\033[32mSetup successfully!\033[0m"
