@@ -1,0 +1,72 @@
+
+# READ ONLY!
+
+PROG="hosts-monitor"
+FORMAT="%-13s%-11s%-15s%-19s%-16s%-17s%-9s%-7s\n"
+HEADER="Date Time Service Event UserID SourceIP Status Remark"
+LINE_LENGTH=$(printf $FORMAT $HEADER | wc -L)
+FOOTER="[ $(date '+%F %R') UPDATE ]"
+TIME=$(date '+%F %T')
+USER_NAME=$(who -m | awk '{print $1}')
+
+CONFIG=./config
+cp $CONFIG ./.config
+sed -n -i '/#.*/d; 1,/\[env\]/d; /\[\w\+\]/,$d; /^$/d; p' ./.config
+. ./.config && rm -f ./.config
+
+service_loc=${SERVICE_LOC:-/etc/cron.hourly/}
+service=$service_loc/hosts-monitor.service
+
+allow_rules=$(sed -n '/#.*/d; 1,/\[allow\]/d; /\[\w\+\]/,$d; /^$/d; p' $CONFIG)
+deny_rules=$(sed -n '/#.*/d; 1,/\[deny\]/d; /\[\w\+\]/,$d; /^$/d; p' $CONFIG)
+
+hosts_deny=/etc/hosts.deny
+hosts_allow=/etc/hosts.allow
+report=${REPORT:-/home/hosts-monitor.report}
+shortrepo=${SUBREPO:-/etc/ssh/sshd_banner}
+
+BOLD=$(tput bold)
+RED=$(tput setaf 1)
+GREEN=$(tput setaf 2)
+RESET=$(tput sgr0)
+TAB=$(printf "\t")
+
+# ---[ Functions
+errmsg() {
+    echo "FATAL: $1"
+}
+check_ip() {
+    IP=$1
+    echo $IP | grep '^[0-9]\{1,3\}\.\(\([0-9]\{1,3\}\.\)\{,2\}$\|\(\([0-9]\{1,3\}\.\)\{2\}[0-9]\{1,3\}$\)\)' > /dev/null && \
+        return 0 || \
+        (errmsg "$RED$BOLD$IP$RESET is a bad ip format!"; return 1)
+}
+
+# ---[ Report Functions
+print_header() {
+    printf $FORMAT "-" | sed 's/ /-/g'
+    printf $FORMAT $HEADER
+    printf $FORMAT "-" | sed 's/ /-/g'
+}
+print_footer() {
+    echo "$FOOTER" | wc -L | \
+        awk -v "len=$LINE_LENGTH" -v "footer=$FOOTER" \
+            '{ for(i=1;i<=(len-$1)/2;i++) printf "-"; }
+            { printf "%s", footer }
+            { for(i=1;i<=(len-$1)/2;i++) printf "-"; printf "\n" }'
+}
+update_repo() {
+    tmp="$shortrepo.tmp"
+    sed -i '/--\[.*\]--/d' $shortrepo
+    ( ( \
+    cat $shortrepo;
+    echo $@ | \
+        awk -v "format=$FORMAT" \
+            'NF>0  { gsub("null","*",$5); printf format, $1, $2, $3, $4, $5, $6, $7, $8 }' | tee -a $report \
+    ) | \
+    column -t -s' ';
+    #print_footer \
+    ) | tee $tmp > /dev/null
+    mv $tmp $shortrepo
+}
+

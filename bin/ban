@@ -1,0 +1,80 @@
+#!/bin/sh
+
+# Custom subscript to ban/unban the login.
+# Usage:
+#     hosts-monitor ban --help
+#     hosts-monitor unban --help
+#
+# Try 'hosts-monitor --help' for more information
+
+# ==== /usr/local/bin/hosts-monitor @ 2018/4/3 by bassykuo <aaammmyyy27@gmail.com> ====
+SUBPROG=$(echo $0 | awk -F'/' '{print $NF}')
+. ./bin/profile
+
+# ---[ Help
+show_help() {
+    printf "%s\n" "Usage: $PROG {ban,unban} [-m <message>] <ip>"
+    echo ""
+    format="%s\t%s\t%s\n"
+    ( \
+    printf $format "ban <ip> ..." "add specific ips to hosts.deny" "ex: ban 1.1.1.1 6.6.6.6 8.8."
+    printf $format "unban <ip> ..." "remove specific ips from hosts.deny" "ex: unban 2.2.2.2 8.8."
+    printf $format "ban -m <message> <ip> ..." "add a description about this action" "ex: ban -m 'Always login as root' 2.2.2.2"
+    printf $format "unban -m <message> <ip> ..." "add a description about this action" "ex: unban -m 'safe user' 2.2.2.2"
+    ) | column -t -s "$TAB" | awk '{print "   "$0}'
+    echo ""
+    exit 0
+}
+
+# ---[ Functions
+ban_ip() {
+    IP=$1; commit=${2:+"   # $2"}
+    echo "ALL: $IP$commit" >> $hosts_deny
+    update_repo "$TIME $PROG Manual:$USER_NAME null $IP Ban $2"
+    echo "$GREEN$BOLD+++ Ban$RESET $IP"
+}
+unban_ip() {
+    IP=$1
+    grep $IP $hosts_deny > /dev/null && ( \
+        sed -i "/$IP$/d" $hosts_deny
+        update_repo "$TIME $PROG Manual:$USER_NAME null $IP Unban $2"
+        echo "$RED${BOLD}--- Unban$RESET $IP"
+        ) || \
+        errmsg "Cannot find $RED$BOLD$IP$RESET in $hosts_deny.  Please check if another ban-list is running or not."
+}
+
+# ---[ Content
+choice=$1
+commit="by $USER_NAME @ $TIME"
+case $1 in
+    "ban"|"unban")
+        shift;
+        if [ $1 = '-m' ] ; then commit=$2; shift; shift; fi
+        KEY=$1
+        case $KEY in
+            "-h"|"--help"|"help")
+                show_help
+                ;;
+            -*)
+                echo "$PROG: invalid option '$@'"
+                echo "Try '$PROG --help' for more information."
+                exit 0
+                ;;
+            *)
+                if [ $# -eq 0 ] ; then
+                    errmsg "Nothing to change."
+                    exit 0
+                fi
+                while test $# -gt 0; do
+                    check_ip $1 && IP=$1 || exit 1
+                    test $choice = 'ban' && ban_ip $IP $commit || unban_ip $IP $commit
+                    shift
+                done
+                test $choice = 'ban' && (echo ; cat $shortrepo)
+                ;;
+        esac
+        ;;
+    *)
+        echo "$PROG $SUBPROG: invalid option '$@'"
+        echo "Try '$PROG $SUBPROG --help' for more information."
+esac

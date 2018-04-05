@@ -1,0 +1,70 @@
+#!/bin/sh
+
+# Source      : /var/auth.log* , /var/log/fail2ban*
+# Destination : /etc/hosts.deny , /etc/hosts.allow
+# Report      : /home/hosts-monitor.report
+
+# ==== /etc/crond.hourly/hosts-monitor.service @ 2018/4/3 by bassykuo <aaammmyyy27@gmail.com> ====
+. ../bin/profile
+
+Date=$(date -d "1 hour ago" '+%h %e %H %F %u')
+set $Date
+M=$1
+d=$2
+h=$3
+F=$4
+week=$5
+
+# Backup
+#   at Monday 01:00
+if [ $week -eq 1 ] && [ $h -eq 0 ]; then
+    for i in $(seq 3 -1 1); do
+        mv $report.$i $report.$(($i+1))
+    done
+    mv $report $report.1
+fi
+
+#report=./report
+#shortrepo=./short
+#hosts_deny=hosts.deny
+test -f $report || print_header >> $report
+# Always ban from /var/log/auth.log*
+( \
+    # brute_force_ips
+    zgrep "^${M}\s\+${d}\s\+${h}:.* pam_unix(sshd:auth):.* rhost=[0-9\.]\+  user=" /var/log/auth.log* | \
+    awk '{print "'${F}' "$3" sshd Failed-Password "$15" "$14}' | sed -e 's/user=//g;s/rhost=//g';
+    # deny_rules
+    zgrep "^${M}\s\+${d}\s\+${h}:.* Invalid user .*[0-9]$" /var/log/auth.log* | \
+    awk '{print "'${F}' "$3" sshd Invalid-User "$8" "$10}' | grep "$(echo $deny_rules | sed 's/ / \\| /g; s/^\(.*\)$/\\( \1 \\)/g')";
+    # retry_ips
+    zgrep "^${M}\s\+${d}\s\+${h}:.* Invalid user .*[0-9]$" /var/log/auth.log* | \
+    awk '{print "'${F}' "$3" sshd Invalid-User "$8" "$10}' | uniq -d;
+) | grep -v "$(echo $allow_rules | sed 's/ / \\| /g; s/^\(.*\)$/\\( \1 \\)/g')" | \
+    sort | \
+    awk -v "format=$FORMAT" \
+        'NF>0 { printf format, $1, $2, $3, $4, $5, $6, "Ban", "" }' | tee $shortrepo | \
+    awk -v "now=$TIME" \
+        'NF>0 {print "ALL: "$6"   # now"}' | sort -k 2 -n >> $hosts_deny
+
+# Always ban from /var/log/fail2ban.log*
+( \
+    # fail2ban_ip
+    zgrep "${F}\s\+${h}:.* Ban" /var/log/fail2ban.log*;
+) | grep -v "$(echo $allow_rules | sed 's/ / \\| /g; s/^\(.*\)$/\\( \1 \\)/g')" | \
+    awk -v "now=$TIME" \
+        'NF>0{print "ALL: "$8"   # now"}' | \
+    sort -u -k 2 -n >> $hosts_deny
+
+# Warning ips from /var/log/auth.log*
+( \
+    # warning_ips
+    zgrep " Invalid user .*[0-9]$" auth.log* | \
+    awk '{print "'${F}' "$3" sshd Invalid-User "$8" "$10}'
+) | \
+    sort | \
+    awk -v "format=$FORMAT" \
+        'NF>0 { printf format, $1, $2, $3, $4, $5, $6, "", "" }' | tee -a $shortrepo > /dev/null
+
+sort -k 2 $shortrepo | uniq | tee $shortrepo >> $report
+sed -i 1i"$(printf $FORMAT $HEADER)" $shortrepo
+

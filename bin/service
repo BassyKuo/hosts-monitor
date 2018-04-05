@@ -1,0 +1,43 @@
+#!/bin/sh
+
+# Custom subscript.
+# Usage:
+#     hosts-monitor service --help
+#
+# Try 'hosts-monitor --help' for more information
+
+# ==== /usr/local/bin/hosts-monitor @ 2018/4/3 by bassykuo <aaammmyyy27@gmail.com> ====
+SUBPROG=$(echo $0 | awk -F'/' '{print $NF}')
+. ./bin/profile
+
+# ---[ Help
+show_help() {
+    printf "%s\n" "Usage: $PROG $SUBPROG {-a|-x|-r}"
+    printf "%s\n" "       $PROG $SUBPROG {start|stop|restart}"
+    echo ""
+    format="%s\t%s\t%s\n"
+    ( \
+    printf $format "-a,start" "enable to run hosts-protect daemon"
+    printf $format "-x,stop" "disable to run hosts-protect daemon"
+    printf $format "-r,restart" "enable and execute the hosts-protect"
+    ) | column -t -s "$TAB" | awk '{print "   "$0}'
+    echo ""
+    exit 0
+}
+
+# ---[ Content
+case $1 in
+    "-a"|"start")
+        chmod +x $service
+        ;;
+    "-x"|"stop")
+        chmod -x $service
+        ;;
+    "-r"|"restart")
+        chmod +x $service
+        $service
+        ;;
+    *)
+        show_help
+        ;;
+esac

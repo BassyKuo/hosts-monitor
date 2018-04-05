@@ -1,0 +1,54 @@
+#!/bin/sh
+
+# Custom script
+# Try --help' for more information
+
+# ==== /usr/local/bin@ 2018/1/22 by bassykuo <aaammmyyy27@gmail.com> ====
+
+PROG=$(echo $0 | awk -F'/' '{print $NF}')
+. ./bin/profile
+
+# ---[ Help
+show_help() {
+    printf "%s\n\n" "Usage: $PROG [COMMAND]"
+    format="%s\t%s\t%s\n"
+    ( \
+    printf $format "log" "access the report with pattern ($report)"
+    printf $format "show" "show status of the specific ip"
+    printf $format "ban,unban" "ban/unban ip" "[root]"
+    printf $format "service" "enable/disable/execute the hosts-monitor.service daemon" "[root]"
+    printf $format "rule" "set allow/deny rules" "[root]"
+    ) | column -t -s "$TAB" | awk '{print "   "$0}'
+    printf "\n%s\n" "Try '$PROG [COMMAND] --help' for more information."
+}
+
+
+# ---[ Content
+case $1 in
+    "-h"|"--help"|"help")
+        show_help
+        exit 0
+        ;;
+    "log")
+        shift;
+        bin/log $@
+        ;;
+    "ban"|"unban")
+        bin/ban $@
+        ;;
+    "show")
+        shift;
+        bin/show $@
+        ;;
+    "rule")
+        shift;
+        bin/rule $@
+        ;;
+    "service")
+        shift;
+        bin/service $@
+        ;;
+    *)
+        echo "$PROG: invalid option '$@'"
+        echo "Try '$PROG --help' for more information."
+esac

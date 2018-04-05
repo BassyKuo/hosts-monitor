@@ -1,0 +1,67 @@
+#!/bin/sh
+
+# Custom subscript to set new allow/deny rule.
+# Usage:
+#   $ hosts-monitor rule --help
+#
+# Try 'hosts-monitor --help' for more information
+
+# ==== /usr/local/bin/hosts-monitor @ 2018/4/3 by bassykuo <aaammmyyy27@gmail.com> ====
+SUBPROG=$(echo $0 | awk -F'/' '{print $NF}')
+. ./bin/profile
+
+# ---[ Help
+show_help() {
+    printf "%s\n" "Usage: $PROG $SUBPROG {-a,--set-allow} <pattern>"
+    printf "%s\n" "       $PROG $SUBPROG {-d,--set-deny} <pattern>"
+    printf "%s\n" "       $PROG $SUBPROG {-x,--remove} <pattern>"
+    echo ""
+    format="%s\t%s\t%s\n"
+    ( \
+    printf $format "-a,--set-allow <pattern>" "always accept the login with the pattern" "ex: rule --set-alow 114.89.62.1"
+    printf $format "-d,--set-deny <pattern>" "always reject the login with the pattern" "ex: rule --set-deny root admin"
+    printf $format "-x,--remove <pattern>" "cancel the rule" "ex: rule -x 114.89.62.1 root"
+    ) | column -t -s "$TAB" | awk '{print "   "$0}'
+    echo ""
+    echo "You can also modify the config file to add rules."
+}
+
+# ---[ Contents
+if [ $# -eq 0 ] ; then
+    errmsg "pattern not find"
+    exit 0
+fi
+while test $# -gt 0 ; do
+    case $1 in
+        "-h"|"--help"|"help")
+            show_help
+            exit 0
+            ;;
+        "-a"|"--set-allow")
+            shift
+            while test $# -gt 0; do
+                sed -i "s/\(\[allow\]\)/\1\n$1/g" $CONFIG
+                shift
+            done
+            ;;
+        "-d"|"--set-deny")
+            shift
+            while test $# -gt 0; do
+                sed -i "s/\(\[deny\]\)/\1\n$1/g" $CONFIG
+                shift
+            done
+            ;;
+        "-x"|"--remove")
+            shift
+            while test $# -gt 0; do
+                sed -i "/^$1$/d" $CONFIG
+                shift
+            done
+            ;;
+        *)
+            echo "$PROG $SUBPROG: invalid option '$@'"
+            echo "Try '$PROG $SUBPROG --help' for more information."
+            exit 0
+            ;;
+    esac
+done

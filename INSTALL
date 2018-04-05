@@ -1,0 +1,11 @@
+#!/bin/bash
+
+. config
+INSTALL_DIR=${INSTALL_LOC:-/opt}/hosts-monitor
+SERVICE=${SERVICE_LOC:-/etc/cron.hourly}/hosts-monitor.service
+
+echo -e "\033[33m>>> Install hosts-monitor in $INSTALL_DIR...\033[0m"
+sudo cp -r . $INSTALL_DIR
+sudo ln -s $INSTALL_DIR/hosts-monitor /usr/local/bin/hosts-monitor
+sudo ln -s $INSTALL_DIR/service/hosts-monitor.service $SERVICE
+echo -e "\033[32mSetup successfully!\033[0m"

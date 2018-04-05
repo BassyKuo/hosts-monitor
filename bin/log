@@ -1,0 +1,96 @@
+#!/bin/sh
+
+# Custom subscript to show the report log.
+# Usage:
+#   $ hosts-monitor log --help
+#
+# Try 'hosts-monitor --help' for more information
+
+# ==== /usr/local/bin/hosts-monitor @ 2018/4/3 by bassykuo <aaammmyyy27@gmail.com> ====
+SUBPROG=$(echo $0 | awk -F'/' '{print $NF}')
+. ./bin/profile
+
+# ---[ Helps
+show_help() {
+    printf "%s\n" "Usage: $PROG $SUBPROG {-t|-s|-e|-u|-i|-S} <pattern>"
+    printf "%s\n" "       $PROG $SUBPROG {-a,--all}"
+    printf "%s\n" "       $PROG $SUBPROG <pattern>"
+    echo ""
+    format="%s\t%s\t%s\n"
+    ( \
+    printf $format "-t,--time [TIME]" "list specific date record" "[TIME]={today,yesterday,3/3/2017,4/1}"
+    printf $format "-s,--service [SERVICE]" "list specific service record" "[SERVICE]={sshd,hosts-monitor}"
+    printf $format "-e,--event [EVENT]" "list specific event record" "[EVENT]={Invalid-User,Failed-Password,Manual}"
+    printf $format "-u,--user,--id [USERID]" "list specific login userid record" "[USERID]={admin,test,root,...}"
+    printf $format "-i,--ip [IP]" "list specific login ip record" "[IP]=xxx.xxx.xxx.xxx"
+    printf $format "-S,--status [STATUS]" "list specific ban/unban record" "[STATUS]={ban,unban}"
+    printf $format "-a,--all" "list all record"
+    printf $format "<pattern>" "search lines with the regex pattern" "ex: 'Ban', '^2018.*root', '\\(root\\|admin\\|user\\)'"
+    ) | column -t -s "$TAB" | awk '{print "   "$0}'
+    echo ""
+    echo "Example:"
+    echo "   $PROG $SUBPROG -t yesterday -i 106.75.76.186"
+    echo "   $PROG $SUBPROG 106.75.76.186"
+}
+
+# ---[ Contents
+if [ $# -eq 0 ] ; then
+    errmsg "pattern not find"
+    exit 0
+fi
+while test $# -gt 0 ; do
+    case $1 in
+        "-h"|"--help"|"help")
+            show_help
+            exit 0
+            ;;
+        "-t"|"--time")
+            STR="$STR $(date -d ${2:-'today'} '+%F')"
+            IDX="$IDX 1"
+            shift; shift;
+            ;;
+        "-s"|"--service")
+            STR="$STR $2"
+            IDX="$IDX 3"
+            shift; shift;
+            ;;
+        "-e"|"--event")
+            STR="$STR $2"
+            IDX="$IDX 4"
+            shift; shift;
+            ;;
+        "-u"|"--user"|"--id")
+            STR="$STR $2"
+            IDX="$IDX 5"
+            shift; shift;
+            ;;
+        "-i"|"--ip")
+            STR="$STR $2"
+            IDX="$IDX 6"
+            shift; shift;
+            ;;
+        "-S"|"--status")
+            echo $2 | grep "^[Bb][Aa][Nn]" > /dev/null && s="^Ban" || s=$2
+            STR="$STR $s"
+            IDX="$IDX 7"
+            shift; shift;
+            ;;
+        "-a"|"--all")
+            STR="$(date '+%Y')"
+            IDX="1"
+            break
+            ;;
+        *)
+            print_header
+            cat ${report}* | grep --color=yes -i "$1" || echo "(empty)"
+            exit 0
+            ;;
+    esac
+done
+print_header
+awk -v "idxes=$IDX" -v "strs=$STR" \
+    'BEGIN{    split(idxes, idx, / +/);
+             n=split(strs, str, / +/); }
+    { flag=1; for (i=2;i<=n;i++) {
+        if (tolower($idx[i]) !~ tolower(str[i])) { flag=0; break; } }
+    if(flag) print $0 }' ${report}* || echo "(empty)"
