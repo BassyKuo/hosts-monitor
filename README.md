@@ -11,6 +11,8 @@ The light service to manage suspicious hosts.  This repository contains:
     * Default report: `/home/hosts-monitor.report`
     * Default shortcut: `/etc/ssh/sshd_banner`
 
+###### Above 2 paths set in `config` file.
+
 * **hosts-monitor** : 
     user command to easily list log in hosts-monitor.report, show the ip status, ban/unban specific ips manually (root only), control `hosts-monitor.service` service to ON/OFF (root only), and set allow/deny rules to hosts-monitor.service.
 
@@ -33,7 +35,7 @@ $ sudo ./INSTALL
 
 or change the installation path:
 ```sh
-$ sudo ./INSTALL
+$ INSTALL_DIR=/opt/HM SERVICE=/etc/cron.daily ./INSTALL
 ```
 
 
@@ -43,16 +45,16 @@ $ sudo ./INSTALL
    1. list/search log
 
 ```sh
-$ hosts-monitor log    # show today's log
-$ hosts-monitor log \(root\|admin\)    # show log which contains `root` or `admin`
-$ hosts-monitor log --status ban       # show the ban list
+$ hosts-monitor log                     # show today's log
+$ hosts-monitor log \(root\|admin\)     # show log which contains `root` or `admin`
+$ hosts-monitor log --status ban        # show the ban list
 $ hosts-monitor log --help
 ```
 
    2. show ip status
 
 ```sh
-$ hosts-monitor show 114.89.62.1
+$ hosts-monitor show 114.89.62.1        # show 114.89.62.1 status
 $ hosts-monitor show --help
 ```
 
@@ -60,8 +62,8 @@ $ hosts-monitor show --help
 
 ```sh
 $ sudo hosts-monitor ban 1.1.1.1            # add 1.1.1.1 into /etc/hosts.deny
-$ sudo hosts-monitor ban 1.1.1.1 2.2.2.2    # allow to input multiple ips
-$ sudo hosts-monitor ban -m 'BruteForce' 1.1.1.1 2.2.2.2   # add description about ips
+$ sudo hosts-monitor ban 1.1.1.1 2.2.2.2    # allow multiple ips
+$ sudo hosts-monitor ban -m 'BruteForce' 1.1.1.1 2.2.2.2   # add description(no space) about ips
 $ sudo hosts-monitor unban 2.2.2.2          # remove 2.2.2.2 from /etc/hosts.deny
 $ hosts-monitor ban --help
 ```
@@ -83,7 +85,7 @@ $ sudo hosts-monitor rule --show                 # show all rules
 $ hosts-monitor rule --help
 ```
 
-Type `hosts-monitor help` to see the detailed description.
+Type `hosts-monitor help` for more description.
 
 
 ## TODO
