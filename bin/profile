@@ -1,8 +1,8 @@
 
 # READ ONLY!
 
-INSTALL_DIR=$HOME/hosts-monitor
-SERVICE=$INSTALL_DIR/service/hosts-monitor.service
+INSTALL_DIR=/opt/hosts-monitor
+SERVICE=/etc/cron.hourly/hosts-monitor.service
 
 PROG="hosts-monitor"
 FORMAT="%-13s%-11s%-15s%-19s%-16s%-17s%-10s%-7s\n"

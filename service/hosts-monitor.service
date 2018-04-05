@@ -24,9 +24,9 @@ if [ $week -eq 1 ] && [ $h -eq 0 ]; then
     mv $report $report.1
 fi
 
-report=./report
-shortrepo=./short
-hosts_deny=hosts.deny
+#report=./report
+#shortrepo=./short
+#hosts_deny=hosts.deny
 test -f $report || print_header >> $report
 # Always ban from /var/log/auth.log*
 ( \
