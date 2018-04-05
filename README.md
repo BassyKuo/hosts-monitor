@@ -1,5 +1,7 @@
 # Hosts-Monitor
 
+#### Version 1.0
+
 The light service to manage suspicious hosts.  This repository contains:
 
 * **hosts-protect** : 
