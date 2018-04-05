@@ -3,10 +3,10 @@
 # Custom script
 # Try --help' for more information
 
-# ==== /usr/local/bin@ 2018/1/22 by bassykuo <aaammmyyy27@gmail.com> ====
+# ==== /usr/local/bin@ 2018/4/3 by bassykuo <aaammmyyy27@gmail.com> ====
 
-PROG=$(echo $0 | awk -F'/' '{print $NF}')
-. ./bin/profile
+INSTALL_DIR=/opt/hosts-monitor
+. $INSTALL_DIR/bin/profile
 
 # ---[ Help
 show_help() {
@@ -31,22 +31,22 @@ case $1 in
         ;;
     "log")
         shift;
-        bin/log $@
+        install_dir=$INSTALL_DIR $INSTALL_DIR/bin/log $@
         ;;
     "ban"|"unban")
-        bin/ban $@
+        install_dir=$INSTALL_DIR $INSTALL_DIR/bin/ban $@
         ;;
     "show")
         shift;
-        bin/show $@
+        install_dir=$INSTALL_DIR $INSTALL_DIR/bin/show $@
         ;;
     "rule")
         shift;
-        bin/rule $@
+        install_dir=$INSTALL_DIR $INSTALL_DIR/bin/rule $@
         ;;
     "service")
         shift;
-        bin/service $@
+        install_dir=$INSTALL_DIR $INSTALL_DIR/bin/service $@
         ;;
     *)
         echo "$PROG: invalid option '$@'"

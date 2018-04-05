@@ -1,11 +1,27 @@
 #!/bin/bash
 
-. config
+# Installation script.
+
+# Default:
+#   INSTALL_LOC=/opt                        # installation location
+#   SERVICE_LOC=/etc/cron.hourly/           # service location
+#
+# Execute:
+#   ./INSTALL
+# or change the installation location:
+#   INSTALL_LOC=/home ; SERVICE_LOC=/etc/cron.daily ; ./INSTALL
+
 INSTALL_DIR=${INSTALL_LOC:-/opt}/hosts-monitor
 SERVICE=${SERVICE_LOC:-/etc/cron.hourly}/hosts-monitor.service
 
-echo -e "\033[33m>>> Install hosts-monitor in $INSTALL_DIR...\033[0m"
+printf "%s\n" ">>> Install hosts-monitor in $INSTALL_DIR..."
+
+( \
+sed -i "s/INSTALL_DIR=.*/INSTALL_DIR=${INSTALL_DIR//\//\\/}/g" hosts-monitor
+sed -i "s/INSTALL_DIR=.*/INSTALL_DIR=${INSTALL_DIR//\//\\/}/g" bin/profile
+sed -i "s/SERVICE=.*/SERVICE=${SERVICE//\//\\/}/g" bin/profile
+
 sudo cp -r . $INSTALL_DIR
 sudo ln -s $INSTALL_DIR/hosts-monitor /usr/local/bin/hosts-monitor
 sudo ln -s $INSTALL_DIR/service/hosts-monitor.service $SERVICE
-echo -e "\033[32mSetup successfully!\033[0m"
+) && printf "\033[32m%s\033[0m\n" "Setup successfully."

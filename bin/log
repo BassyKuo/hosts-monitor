@@ -8,7 +8,7 @@
 
 # ==== /usr/local/bin/hosts-monitor @ 2018/4/3 by bassykuo <aaammmyyy27@gmail.com> ====
 SUBPROG=$(echo $0 | awk -F'/' '{print $NF}')
-. ./bin/profile
+. $install_dir/bin/profile
 
 # ---[ Helps
 show_help() {
@@ -34,8 +34,9 @@ show_help() {
 }
 
 # ---[ Contents
-if [ $# -eq 0 ] ; then
-    errmsg "pattern not find"
+if [ $# -eq 0 ]; then
+    print_header
+    cat ${report}* | grep --color=yes $(date -d today '+%F') || echo "(empty)"
     exit 0
 fi
 while test $# -gt 0 ; do
@@ -78,7 +79,8 @@ while test $# -gt 0 ; do
         "-a"|"--all")
             STR="$(date '+%Y')"
             IDX="1"
-            break
+            shift;
+            break;
             ;;
         *)
             print_header

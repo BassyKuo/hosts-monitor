@@ -12,24 +12,31 @@ The light service to manage suspicious hosts.  This repository contains:
     * Default shortcut: `/etc/ssh/sshd_banner`
 
 * **hosts-monitor** : 
-    user command to easily list log in hosts-monitor.report, ban/unban specific ips manually (root only), control `hosts-monitor.service` service to ON/OFF (root only), and set allow/deny rules to hosts-monitor.service.
+    user command to easily list log in hosts-monitor.report, show the ip status, ban/unban specific ips manually (root only), control `hosts-monitor.service` service to ON/OFF (root only), and set allow/deny rules to hosts-monitor.service.
 
     * log path: `/home/hosts-monitor.report` 
     * ban-list: `/etc/hosts.deny` (the only ban-list accessed.  If you unban unsuccessfully, check whether another ban-list is running or not.)
 
 * **config** :
-    the configure file including the installation path, service running path, report path, and allow/deny rules. edit this file if you need.
+    the configure file including the report path, and allow/deny rules. edit this file if you need.
 
-    * Default installation directory: `/opt/`
-    * Default service path: `/etc/cron.hourly/`
+* **INSTALL** :
+    * Default installation directory: `INSTALL_DIR=/opt/hosts-monitor`
+    * Default service path: `SERVICE=/etc/cron.hourly/hosts-monitor.service`
 
 
 ## Setup
 
 ```sh
-# edit `config` if you need
 $ sudo ./INSTALL
 ```
+
+or change the installation path:
+```sh
+$ sudo ./INSTALL
+```
+
+
 
 ## Usage Examples
 
@@ -42,16 +49,24 @@ $ hosts-monitor log --status ban       # show the ban list
 $ hosts-monitor log --help
 ```
 
-   2. ban/unban ip [root only]
+   2. show ip status
 
 ```sh
-$ sudo hosts-monitor ban 1.1.1.1    # add 1.1.1.1 into /etc/hosts.deny
-$ sudo hosts-monitor ban 1.1.1.1 2.2.2.2   # allow to input multiple ips
-$ sudo hosts-monitor unban 2.2.2.2  # remove 2.2.2.2 from /etc/hosts.deny
+$ hosts-monitor show 114.89.62.1
+$ hosts-monitor show --help
+```
+
+   3. ban/unban ip [root only]
+
+```sh
+$ sudo hosts-monitor ban 1.1.1.1            # add 1.1.1.1 into /etc/hosts.deny
+$ sudo hosts-monitor ban 1.1.1.1 2.2.2.2    # allow to input multiple ips
+$ sudo hosts-monitor ban -m 'BruteForce' 1.1.1.1 2.2.2.2   # add description about ips
+$ sudo hosts-monitor unban 2.2.2.2          # remove 2.2.2.2 from /etc/hosts.deny
 $ hosts-monitor ban --help
 ```
 
-   3. control `hosts-monitor.service` [root only]
+   4. control `hosts-monitor.service` [root only]
 
 ```sh
 $ sudo hosts-monitor service stop       # disable hosts-monitor.service
@@ -59,11 +74,12 @@ $ sudo hosts-monitor service restart    # enable hosts-monitor.service and run i
 $ hosts-monitor service --help
 ```
 
-   4. add allow/deny rules for `hosts-monitor.service` [root only]
+   5. add allow/deny rules for `hosts-monitor.service` [root only]
 
 ```sh
 $ sudo hosts-monitor rule --set-deny test user   # login with `test` or `user` will be rejected
 $ sudo hosts-monitor rule --remove root          # cancel this rule
+$ sudo hosts-monitor rule --show                 # show all rules
 $ hosts-monitor rule --help
 ```
 
@@ -74,3 +90,4 @@ Type `hosts-monitor help` to see the detailed description.
 - [x] Merge hosts-monitor & hosts-monitor.service (saved in `/opt/hosts-monitor`)
 - [x] Ban-Rule add: username
 - [x] Always-Allow: ip @ /etc/hosts.allow
+- [x] show the /etc/hosts.deny status

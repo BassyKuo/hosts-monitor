@@ -8,7 +8,7 @@
 
 # ==== /usr/local/bin/hosts-monitor @ 2018/4/3 by bassykuo <aaammmyyy27@gmail.com> ====
 SUBPROG=$(echo $0 | awk -F'/' '{print $NF}')
-. ./bin/profile
+. $install_dir/bin/profile
 
 # ---[ Help
 show_help() {

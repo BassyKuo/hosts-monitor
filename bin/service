@@ -8,7 +8,7 @@
 
 # ==== /usr/local/bin/hosts-monitor @ 2018/4/3 by bassykuo <aaammmyyy27@gmail.com> ====
 SUBPROG=$(echo $0 | awk -F'/' '{print $NF}')
-. ./bin/profile
+. $install_dir/bin/profile
 
 # ---[ Help
 show_help() {
@@ -17,9 +17,9 @@ show_help() {
     echo ""
     format="%s\t%s\t%s\n"
     ( \
-    printf $format "-a,start" "enable to run hosts-protect daemon"
-    printf $format "-x,stop" "disable to run hosts-protect daemon"
-    printf $format "-r,restart" "enable and execute the hosts-protect"
+    printf $format "-a,start" "enable to run hosts-monitor.service daemon"
+    printf $format "-x,stop" "disable to run hosts-monitor.service daemon"
+    printf $format "-r,restart" "enable and execute the hosts-monitor.service"
     ) | column -t -s "$TAB" | awk '{print "   "$0}'
     echo ""
     exit 0
@@ -27,17 +27,23 @@ show_help() {
 
 # ---[ Content
 case $1 in
+    "-h"|"--help"|"help")
+        show_help
+        exit 0
+        ;;
     "-a"|"start")
-        chmod +x $service
+        chmod +x $SERVICE
         ;;
     "-x"|"stop")
-        chmod -x $service
+        chmod -x $SERVICE
         ;;
     "-r"|"restart")
-        chmod +x $service
-        $service
+        chmod +x $SERVICE
+        $SERVICE
         ;;
     *)
-        show_help
+        echo "$PROG $SUBPROG: invalid option '$@'"
+        echo "Try '$PROG $SUBPROG --help' for more information."
+        exit 0
         ;;
 esac

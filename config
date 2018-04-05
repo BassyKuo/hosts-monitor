@@ -6,10 +6,8 @@
 # Set location of the following items.
 # comment it if you wanna use default value.
 [env]
-INSTALL_LOC=/opt                        # installation location
 REPORT=/home/hosts-monitor.report       # daily report
 SUBREPO=/etc/ssh/sshd_banner            # cache (hourly update)
-SERVICE_LOC=/etc/cron.hourly/           # service location
 
 
 # Any ip can be always accepted with the following pattern.
