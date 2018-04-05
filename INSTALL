@@ -18,6 +18,7 @@ printf "%s\n" ">>> Install hosts-monitor in $INSTALL_DIR..."
 
 ( \
 sed -i "s/INSTALL_DIR=.*/INSTALL_DIR=${INSTALL_DIR//\//\\/}/g" hosts-monitor
+sed -i "s/INSTALL_DIR=.*/INSTALL_DIR=${INSTALL_DIR//\//\\/}/g" service/hosts-monitor.service
 sed -i "s/INSTALL_DIR=.*/INSTALL_DIR=${INSTALL_DIR//\//\\/}/g" bin/profile
 sed -i "s/SERVICE=.*/SERVICE=${SERVICE//\//\\/}/g" bin/profile
 

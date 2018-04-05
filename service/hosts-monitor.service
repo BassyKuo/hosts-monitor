@@ -5,7 +5,9 @@
 # Report      : /home/hosts-monitor.report
 
 # ==== /etc/crond.hourly/hosts-monitor.service @ 2018/4/3 by bassykuo <aaammmyyy27@gmail.com> ====
-. $install_dir/bin/profile
+
+INSTALL_DIR=/opt/hosts-monitor
+. $INSTALL_DIR/bin/profile
 
 Date=$(date -d "1 hour ago" '+%h %e %H %F %u')
 set $Date
