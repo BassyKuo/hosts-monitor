@@ -29,8 +29,7 @@ show_help() {
 # ---[ Functions
 ban_ip() {
     IP=$1; shift;
-    commit=${1:+"   # $@"}
-    echo "ALL: $IP$commit" >> $hosts_deny
+    echo "ALL: $IP${1:+"   # $@"}" >> $hosts_deny
     update_repo "$TIME $PROG Manual:$USER_NAME null $IP Ban $@"
     echo "$GREEN$BOLD+++ Ban$RESET $IP"
 }

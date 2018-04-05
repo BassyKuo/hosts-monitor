@@ -1,15 +1,15 @@
 
 # READ ONLY!
 
-INSTALL_DIR=/opt/hosts-monitor
-SERVICE=/etc/cron.hourly/hosts-monitor.service
+INSTALL_DIR=$HOME/hosts-monitor
+SERVICE=$INSTALL_DIR/service/hosts-monitor.service
 
 PROG="hosts-monitor"
 FORMAT="%-13s%-11s%-15s%-19s%-16s%-17s%-10s%-7s\n"
 HEADER="Date Time Service Event UserID SourceIP Status Remark"
 LINE_LENGTH=$(printf $FORMAT $HEADER | wc -L)
 FOOTER="[ $(date '+%F %R') UPDATE ]"
-TIME=$(date '+%F %T')
+TIME=$(date '+%F.%T')
 USER_NAME=$(who -m | awk '{print $1}')
 
 CONFIG=$INSTALL_DIR/config
