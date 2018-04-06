@@ -2,7 +2,7 @@
 # READ ONLY!
 
 INSTALL_DIR=/opt/hosts-monitor
-SERVICE=/etc/cron.hourly/hosts-monitor.service
+SERVICE=/etc/cron.hourly/hosts-monitor-service
 
 PROG="hosts-monitor"
 FORMAT="%-13s%-11s%-15s%-19s%-16s%-17s%-10s%-7s\n"
