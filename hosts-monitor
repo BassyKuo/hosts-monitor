@@ -46,7 +46,7 @@ case $1 in
         ;;
     "service")
         shift;
-        $INSTALL_DIR/bin/service $@
+        install_dir=$INSTALL_DIR $INSTALL_DIR/bin/service $@
         ;;
     *)
         echo "$PROG: invalid option '$@'"
