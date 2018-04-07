@@ -59,22 +59,31 @@ while test $# -gt 0 ; do
             shift
             while test $# -gt 0; do
                 sed -i "s/\(\[allow\]\)/\1\n$1/g" $CONFIG
+                printf "$GREEN$BOLD +++ $RESET %s $RESET\n" "$1"
                 shift
             done
+            echo ""
+            show_rules
             ;;
         "-d"|"--set-deny")
             shift
             while test $# -gt 0; do
                 sed -i "s/\(\[deny\]\)/\1\n$1/g" $CONFIG
+                printf "$RED$BOLD +++ $RESET %s $RESET\n" "$1"
                 shift
             done
+            echo ""
+            show_rules
             ;;
         "-x"|"--remove")
             shift
             while test $# -gt 0; do
                 sed -i "/^$1$/d" $CONFIG
+                printf "\033[0;37;41m ---  %s $RESET\n" "$1"
                 shift
             done
+            echo ""
+            show_rules
             ;;
         *)
             echo "$PROG $SUBPROG: invalid option '$@'"

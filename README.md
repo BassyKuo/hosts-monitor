@@ -93,3 +93,6 @@ Type `hosts-monitor help` for more description.
 - [x] Ban-Rule add: username
 - [x] Always-Allow: ip @ /etc/hosts.allow
 - [x] show the /etc/hosts.deny status
+- [ ] show ip status: add `--oneline` argument
+- [ ] `stat` : summary the ip (1) login times (2) login username (3) current status in report
+- [ ] ban list

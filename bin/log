@@ -18,19 +18,20 @@ show_help() {
     echo ""
     format="%s\t%s\t%s\n"
     ( \
-    printf $format "-t,--time [TIME]" "list specific date record" "[TIME]={today,yesterday,3/3/2017,4/1}"
-    printf $format "-s,--service [SERVICE]" "list specific service record" "[SERVICE]={sshd,hosts-monitor}"
-    printf $format "-e,--event [EVENT]" "list specific event record" "[EVENT]={Invalid-User,Failed-Password,Manual}"
-    printf $format "-u,--user,--id [USERID]" "list specific login userid record" "[USERID]={admin,test,root,...}"
-    printf $format "-i,--ip [IP]" "list specific login ip record" "[IP]=xxx.xxx.xxx.xxx"
-    printf $format "-S,--status [STATUS]" "list specific ban/unban record" "[STATUS]={ban,unban}"
-    printf $format "-a,--all" "list all record"
+    printf $format "-t,--time [TIME]" "list specific date log" "[TIME]={today,yesterday,3/3/2017,4/1}"
+    printf $format "-s,--service [SERVICE]" "list specific service log" "[SERVICE]={sshd,hosts-monitor}"
+    printf $format "-e,--event [EVENT]" "list specific event log" "[EVENT]={Invalid-User,Failed-Password,Manual}"
+    printf $format "-u,--user,--id [USERID]" "list specific login userid log" "[USERID]={admin,test,root,...}"
+    printf $format "-i,--ip [IP]" "list specific login ip log" "[IP]=xxx.xxx.xxx.xxx"
+    printf $format "-S,--status [STATUS]" "list specific ban/unban log" "[STATUS]={ban,unban}"
+    printf $format "-a,--all" "list all log"
     printf $format "<pattern>" "search lines with the regex pattern" "ex: 'Ban', '^2018.*root', '\\(root\\|admin\\|user\\)'"
+    printf $format "--color={yes|no}" "highlight pattern or not" "[Default]: yes"
     ) | column -t -s "$TAB" | awk '{print "   "$0}'
     echo ""
     echo "Example:"
     echo "   $PROG $SUBPROG -t yesterday -i 106.75.76.186"
-    echo "   $PROG $SUBPROG 106.75.76.186"
+    echo "   $PROG $SUBPROG 106.75.76.186 --color=no"
 }
 
 # ---[ Contents
@@ -82,9 +83,27 @@ while test $# -gt 0 ; do
             shift;
             break;
             ;;
+        --color|--color=*)
+            if $(echo $1 | grep '=' > /dev/null) ; then 
+                cop=$(echo $1 | awk -F'=' '{print $2}')
+            else
+                shift; cop=$1
+            fi
+            shift;
+            ;;
+        -*)
+            errmsg "unrecognized option '$1'"
+            exit 0
+            ;;
         *)
+            printf "Search pattern: $BOLD%s$RESET\n" "$1"
+            if test $2 = '--color' ; then 
+                cop=$3
+            elif test $2 = '--color=no' || test $2 = '--color=yes' ; then
+                cop=$(echo $2 | awk -F'=' '{print $2}')
+            fi
             print_header
-            cat ${report}* | grep --color=yes -i "$1" || echo "(empty)"
+            cat ${report}* | grep --color=${cop:-yes} -i "$1" || echo "(empty)"
             exit 0
             ;;
     esac
@@ -95,4 +114,4 @@ awk -v "idxes=$IDX" -v "strs=$STR" \
              n=split(strs, str, / +/); }
     { flag=1; for (i=2;i<=n;i++) {
         if (tolower($idx[i]) !~ tolower(str[i])) { flag=0; break; } }
-    if(flag) print $0 }' ${report}* || echo "(empty)"
+      if(flag) print $0 }' ${report}* | grep "\($(echo $STR | sed "s/ /\\\|/g;")\)" --color=${cop:-yes} || echo "(empty)"
