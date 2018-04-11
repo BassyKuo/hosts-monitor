@@ -17,8 +17,6 @@ cp $CONFIG /tmp/.hm.config
 sed -n -i '/#.*/d; 1,/\[env\]/d; /\[\w\+\]/,$d; /^$/d; p' /tmp/.hm.config
 . /tmp/.hm.config && rm -f /tmp/.hm.config
 
-allow_rules=$(sed -n '/#.*/d; 1,/\[allow\]/d; /\[\w\+\]/,$d; /^$/d; p' $CONFIG)
-deny_rules=$(sed -n '/#.*/d; 1,/\[deny\]/d; /\[\w\+\]/,$d; /^$/d; p' $CONFIG)
 
 hosts_deny=/etc/hosts.deny
 hosts_allow=/etc/hosts.allow
@@ -42,6 +40,11 @@ check_ip() {
         return 0 || \
         (errmsg "$RED$BOLD$IP$RESET is a bad ip format!"; return 1)
 }
+fetch_rules() {
+    allow_rules=$(sed -n '/#.*/d; 1,/\[allow\]/d; /\[\w\+\]/,$d; /^$/d; p' $CONFIG)
+    deny_rules=$(sed -n '/#.*/d; 1,/\[deny\]/d; /\[\w\+\]/,$d; /^$/d; p' $CONFIG)
+}
+
 
 # ---[ Report Functions
 print_header() {
