@@ -30,6 +30,7 @@ show_help() {
 
 # ---[ Functions
 show_rules() {
+    fetch_rules
     printf "%s\n" "Allow Rules:"
     for i in $allow_rules; do
         printf "$GREEN%s$RESET\n" "$i"

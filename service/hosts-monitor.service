@@ -30,6 +30,8 @@ fi
 #shortrepo=./short
 #hosts_deny=hosts.deny
 test -f $report || print_header >> $report
+fetch_rules
+
 # Always ban from /var/log/auth.log*
 ( \
     # brute_force_ips
