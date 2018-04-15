@@ -30,14 +30,14 @@ show_help() {
 ban_ip() {
     IP=$1; shift;
     echo "ALL: $IP${1:+"   # $@"}" >> $hosts_deny
-    update_repo "$TIME $PROG Manual:$USER_NAME null $IP Ban $@"
+    update_repo "$(date '+%F %T') $PROG Manual:$USER_NAME null $IP Ban $@"
     echo "$GREEN$BOLD+++ Ban$RESET $IP"
 }
 unban_ip() {
     IP=$1
     grep $IP $hosts_deny > /dev/null && ( \
         sed -i "/$IP$/d" $hosts_deny
-        update_repo "$TIME $PROG Manual:$USER_NAME null $IP Unban $2"
+        update_repo "$(date '+%F %T') $PROG Manual:$USER_NAME null $IP Unban $2"
         echo "$RED${BOLD}--- Unban$RESET $IP"
         ) || \
         errmsg "Cannot find $RED$BOLD$IP$RESET in $hosts_deny.  Please check if another ban-list is running or not."
