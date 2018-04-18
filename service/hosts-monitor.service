@@ -36,10 +36,10 @@ fetch_rules
 ( \
     # brute_force_ips
     zgrep "^${M}\s\+${d}\s\+${h}:.* pam_unix(sshd:auth):.* rhost=[0-9\.]\+  user=" /var/log/auth.log* | \
-    awk '{print "'${F}' "$3" sshd Failed-Password "$15" "$14}' | sed -e 's/user=//g;s/rhost=//g';
+    awk '{print "'${F}' "$3" sshd Failed-Password "$15" "$14" "}' | sed -e 's/user=//g;s/rhost=//g';
     # deny_rules
     zgrep "^${M}\s\+${d}\s\+${h}:.* Invalid user .*[0-9]$" /var/log/auth.log* | \
-    awk '{print "'${F}' "$3" sshd Invalid-User "$8" "$10}' | grep --color=no "$(echo $deny_rules | sed 's/ / \\| /g; s/^\(.*\)$/\\( \1 \\)/g')";
+    awk '{print "'${F}' "$3" sshd Invalid-User "$8" "$10" "}' | grep --color=no "$(echo $deny_rules | sed 's/ / \\| /g; s/^\(.*\)$/\\( \1 \\)/g')";
 ) | grep -v "$(echo $allow_rules | sed 's/ / \\| /g; s/^\(.*\)$/\\( \1 \\)/g')" | \
     sort | \
     awk -v "format=$FORMAT" \
@@ -51,15 +51,15 @@ fetch_rules
 ( \
     # fail2ban_ip
     zgrep "${F}\s\+${h}:.* Ban" /var/log/fail2ban.log* | \
-    grep -v "$(echo $allow_rules | sed 's/ / \\| /g; s/^\(.*\)$/\\( \1 \\)/g')" | \
     awk -v "time_stamp=$TIME" \
         'NF>0 { printf "ALL: %-18s # %s (Fail2ban)\n", $8, time_stamp }';
     # retry_ips
     zgrep "^${M}\s\+${d}\s\+${h}:.* Invalid user .*[0-9]$" /var/log/auth.log* | \
-    grep -v "$(echo $allow_rules | sed 's/ / \\| /g; s/^\(.*\)$/\\( \1 \\)/g')" | \
     awk -v "time_stamp=$TIME" \
         'NF>0 { printf "ALL: %-18s # %s (Retry BruteForce)\n", $10, time_stamp }' | uniq -d;
-) | sort -u -k 2 -n >> $hosts_deny
+) | \
+    grep -v "$(echo $allow_rules | sed 's/ / \\| /g; s/^\(.*\)$/\\( \1 \\)/g')" | \
+    sort -u -k 2 -n >> $hosts_deny
 
 # Warning ips from /var/log/auth.log*
 ( \
