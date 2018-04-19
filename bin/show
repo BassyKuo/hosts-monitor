@@ -18,7 +18,7 @@ show_help() {
     ( \
     printf $format "<OPTION>" "" ""
     printf $format "   --log=ARG, -n=ARG " "show the login log in report "    "  ${UNDERLINE}ARG$RESET={yes|all,NUM,auto,no}"
-    printf $format "   --oneline" "show the status in one-line (coming soon)" ""
+    printf $format "   --oneline" "show the status in one-line " ""
     printf "\n"
     printf $format "<IP>" "show the status of the specific ip" ""
     ) | column -e -t -s "$TAB" | awk '{print "   "$0}'
