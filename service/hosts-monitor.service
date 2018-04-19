@@ -45,7 +45,7 @@ fetch_rules
     awk -v "format=$FORMAT" \
         'NF>0 { printf format, $1, $2, $3, $4, $5, $6, "Ban", "" }' | tee $shortrepo | \
     awk -v "time_stamp=$TIME" \
-        'NF>0 { printf "ALL: %-18s # %s (DenyRule)\n", $6, time_stamp }' | sort -k 2 -n | uniq >> $hosts_deny
+        'NF>0 { printf "ALL: %-18s # %s (DenyRule login:%s)\n", $6, time_stamp, $5 }' | sort -k 2 -n | uniq >> $hosts_deny
 
 # Always ban from /var/log/fail2ban.log* and retry_ips from /var/log/auth.log*
 ( \

@@ -23,6 +23,7 @@ hosts_allow=/etc/hosts.allow
 report=${REPORT:-/home/hosts-monitor.report}
 shortrepo=${SUBREPO:-/etc/ssh/sshd_banner}
 
+UNDERLINE=$(tput smul)
 BOLD=$(tput bold)
 RED=$(tput setaf 1)
 GREEN=$(tput setaf 2)

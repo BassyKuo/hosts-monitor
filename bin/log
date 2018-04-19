@@ -96,14 +96,22 @@ while test $# -gt 0 ; do
             exit 0
             ;;
         *)
-            printf "Search pattern: $BOLD%s$RESET\n" "$1"
-            if test $2 = '--color' ; then 
-                cop=$3
-            elif test $2 = '--color=no' || test $2 = '--color=yes' ; then
-                cop=$(echo $2 | awk -F'=' '{print $2}')
-            fi
+            pattern=$1
+            printf "Search pattern: $BOLD%s$RESET\n" "$pattern"
+            shift;
+            case $1 in
+                --color|--color=*)
+                    if $(echo $1 | grep '=' > /dev/null) ; then 
+                        cop=$(echo $1 | awk -F'=' '{print $2}')
+                    else
+                        shift; cop=$1
+                    fi
+                    ;;
+                *)
+                    ;;
+            esac
             print_header
-            cat ${report}* | grep --color=${cop:-yes} -i "$1" || echo "(empty)"
+            cat ${report}* | grep --color=${cop:-yes} -i "$pattern" || echo "(empty)"
             exit 0
             ;;
     esac

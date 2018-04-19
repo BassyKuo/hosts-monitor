@@ -12,45 +12,99 @@ SUBPROG=$(echo $0 | awk -F'/' '{print $NF}')
 
 # ---[ Help
 show_help() {
-    printf "%s\n" "Usage: $PROG $SUBPROG <IP>"
+    printf "%s\n" "Usage: $PROG $SUBPROG [<OPTION>] <IP>..."
     echo ""
     format="%s\t%s\t%s\n"
     ( \
+    printf $format "<OPTION>" "" ""
+    printf $format "   --log=ARG, -n=ARG " "show the login log in report "    "  ${UNDERLINE}ARG$RESET={yes|all,NUM,auto,no}"
+    printf $format "   --oneline" "show the status in one-line (coming soon)" ""
+    printf "\n"
     printf $format "<IP>" "show the status of the specific ip" ""
-    ) | column -t -s "$TAB" | awk '{print "   "$0}'
+    ) | column -e -t -s "$TAB" | awk '{print "   "$0}'
     echo ""
     echo "Example:"
     echo "   $PROG $SUBPROG 114.89.20.1 185.99.195.9"
+    echo "   $PROG $SUBPROG --log=3 114.89.20.1 185.99.195.9"
+    echo "   $PROG $SUBPROG --oneline 114.89.20.1 185.99.195.9"
     exit 0
 }
 
 # ---[ Functions
 show_status() {
-    printf "$BOLD%s$RESET\n" "$1"           # ip: xxx.xxx.xxx.xxx
-    printf "%-9s %s\n" "status:" "$2"       # status: Ban(red) or Accept(green)
-    printf "%-9s %s\n" "location:" "$3"     # location: /etc/hosts.deny or /etc/hosts.allow or default
-    shift; shift; shift;
-    printf "%-9s %s\n" "comment:" "$*"      # comment: description
-    printf "\n"
+    case $1 in  #oneline
+        yes)
+            shift; shift;
+            show_status_oneline $*
+            ;;
+        *)
+            log_arg=$2; ip=$3
+            shift; shift;
+            printf "$BOLD%s$RESET\n"        "$1"                # ip: xxx.xxx.xxx.xxx
+            printf "%-9s %s\n" "status:"    "$2"                # status: Ban(red) or Accept(green)
+            printf "%-9s %s\n" "location:"  "$3"                # location: /etc/hosts.deny or /etc/hosts.allow or default
+            shift; shift; shift;
+            printf "%-9s %s\n" "comment:"   "$*"                # comment: description
+            show_ip_log $ip $log_arg
+            echo
+            ;;
+    esac
 }
+
+show_status_oneline() {
+    ip=$1
+    printf "%-20s%-20s" "$2" "$1"       # STATUS IP LOG
+    shift; shift; shift;
+    echo $*
+    #if grep --color=no "\s$ip\s" $report* | sed "s/^[^:]\+://g" | column -t | sort -r | head -n1 ; then echo "(none)"; fi
+}
+
+show_ip_log() {
+    ip=$1
+    log_arg=$2
+    (
+    printf "%-9s\n"    "log:"                           # log: login record in report
+    grep --color=no "\s$ip\s" $report* | sed "s/^[^:]\+://g" | column -t | awk '{printf "%-9s %s\n", "", $0}' | sort -r ) | \
+    (
+    case $log_arg in
+        yes|all)
+            cat
+            ;;
+        auto)
+            head -n 11
+            ;;
+        [0-9]*[^0-9]*)
+            ;;
+        [0-9]*)
+            head -n $(($log_arg+1))
+            ;;
+        *)
+            ;;
+    esac
+    )
+}
+
 check_and_show_status() {
+    ip=$1
+    log_arg=$2
+    oneline=$3
     if grep "\s$1\s" $hosts_deny > /dev/null; then
-        commit=$(grep "\s$1\s" $hosts_deny | sed -n 's/^[^#]*# *//; $p')
-        show_status $1 "${RED}Ban$RESET" $hosts_deny $commit
+        comment=$(grep "\s$1\s" $hosts_deny | sed -n 's/^[^#]*# *//; $p')
+        show_status $oneline $log_arg $1 "${RED}Ban$RESET" $hosts_deny $comment
 
     elif grep "\s$1\s" $hosts_allow > /dev/null; then
-        commit=$(grep "\s$1\s" $hosts_allow | sed -n 's/^[^#]*# *//; $p')
-        show_status $1 "${GREEN}Accept$RESET" $hosts_allow $commit
+        comment=$(grep "\s$1\s" $hosts_allow | sed -n 's/^[^#]*# *//; $p')
+        show_status $oneline $log_arg $1 "${GREEN}Accept$RESET" $hosts_allow $comment
 
     else
         if grep "\s$1" $hosts_deny > /dev/null; then
-            printf "Cannot match $RED$BOLD$1$RESET Find similar case ...\n\n"
+            printf "${YELLOW}Cannot match $RED$BOLD$1$RESET ${YELLOW}Find similar case ...$RESET\n"
             for ip in $(grep --color=no "\s$1" $hosts_deny | awk '{print $2}' | uniq); do
-                commit=$(grep "\s$ip" $hosts_deny | sed -n 's/^[^#]*# *//; $p')
-                show_status $ip "${RED}Ban$RESET" $hosts_deny $commit
+                comment=$(grep "\s$ip" $hosts_deny | sed -n 's/^[^#]*# *//; $p')
+                show_status $oneline $log_arg $ip "${RED}Ban$RESET" $hosts_deny $comment
             done
         else
-            show_status $1 "${GREEN}Accept$RESET" "(default)" ""
+            show_status $oneline $log_arg $1 "${GREEN}Accept$RESET" "(default)" ""
         fi
     fi
 }
@@ -61,20 +115,34 @@ if [ $# -eq 0 ] ; then
     echo "Try '$PROG $SUBPROG --help' for more information."
     exit 0
 fi
-case $1 in
-    "-h"|"--help"|"help")
-        show_help
-        ;;
-    -*)
-        echo "$PROG $SUBPROG: invalid option '$@'"
-        echo "Try '$PROG $SUBPROG --help' for more information."
-        exit 0
-        ;;
-    *)
-        while test $# -gt 0; do
-            check_ip $1 && IP=$1 || exit 1
-            check_and_show_status $IP
+echo "$*" | grep "\s\-\-oneline" > /dev/null && oneline=yes
+log_arg=$(echo "$*" | grep "\(\-\-log\|\-n\)" | sed "s/^.*\(--log\|-n\)[ =]*\([^ ]\+\).*$/\2/g")
+
+while test $# -gt 0 ; do
+    case $1 in
+        "-h"|"--help"|"help")
+            show_help
+            ;;
+        --log|--log=*|-n|-n=*)
+            if $(echo $1 | grep '=' > /dev/null) ; then 
+                shift
+            else
+                shift; shift
+            fi
+            ;;
+        --oneline*)
+            #oneline=yes
             shift
-        done
-        ;;
-esac
+            ;;
+        -*)
+            echo "$PROG $SUBPROG: invalid option '$@'"
+            echo "Try '$PROG $SUBPROG --help' for more information."
+            exit 0
+            ;;
+        *)
+            check_ip $1 && IP=$1 || exit 1
+            check_and_show_status $IP ${log_arg:-auto} ${oneline:-no}
+            shift
+            ;;
+    esac
+done
