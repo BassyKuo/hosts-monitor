@@ -29,14 +29,14 @@ show_help() {
 # ---[ Functions
 ban_ip() {
     IP=$1; shift;
-    echo "ALL: $IP${1:+"   # $@"}" >> $hosts_deny
+    (printf "ALL: %-18s # " "$IP" ; echo "${1:+"$@"}") >> $hosts_deny
     update_repo "$(date '+%F %T') $PROG Manual:$USER_NAME null $IP Ban $@"
     echo "$GREEN$BOLD+++ Ban$RESET $IP"
 }
 unban_ip() {
     IP=$1
     grep $IP $hosts_deny > /dev/null && ( \
-        sed -i "/$IP$/d" $hosts_deny
+        sed -i "/$IP\($\| \)/d" $hosts_deny
         update_repo "$(date '+%F %T') $PROG Manual:$USER_NAME null $IP Unban $2"
         echo "$RED${BOLD}--- Unban$RESET $IP"
         ) || \
@@ -45,11 +45,11 @@ unban_ip() {
 
 # ---[ Content
 choice=$1
-commit="$TIME by $USER_NAME"
+comment="$TIME by $USER_NAME"
 case $1 in
     "ban"|"unban")
         shift;
-        if [ "$1" = '-m' ] ; then commit="$2"; shift; shift; fi
+        if [ "$1" = '-m' ] ; then comment="$2"; shift; shift; fi
         KEY=$1
         case $KEY in
             "-h"|"--help"|"help")
@@ -68,7 +68,7 @@ case $1 in
                 fi
                 while test $# -gt 0; do
                     check_ip $1 && IP=$1 || exit 1
-                    test $choice = 'ban' && ban_ip $IP $(echo $commit | sed 's/ /_/g') || unban_ip $IP $(echo $commit | sed 's/ /_/g')
+                    test $choice = 'ban' && ban_ip $IP $(echo $comment | sed 's/ /_/g; s/\:/-/g') || unban_ip $IP $(echo $comment | sed 's/ /_/g; s/\:/-/g')
                     shift
                 done
                 test $choice = 'ban' && (echo ; cat $shortrepo)

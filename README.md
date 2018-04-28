@@ -89,10 +89,19 @@ Type `hosts-monitor help` for more description.
 
 
 ## TODO
+#### r2.0.0
 - [x] Merge hosts-monitor & hosts-monitor.service (saved in `/opt/hosts-monitor`)
 - [x] Ban-Rule add: username
 - [x] Always-Allow: ip @ /etc/hosts.allow
 - [x] show the /etc/hosts.deny status
-- [ ] show ip status: add `--oneline` argument
+
+#### r2.1.0
+- [x] show ip status: add `--oneline` argument
 - [ ] `stat` : summary the ip (1) login times (2) login username (3) current status in report
-- [ ] ban list
+- [ ] ban list (like `$ fail2ban-client status sshd` + tree)
+- [x] [4/22 05:00 testing] (log) print short-report if empty
+- [x] (ban) ban comment prompt ; unban bugs
+- [x] (hosts.deny) the comment prompt \`#' caused **error: /etc/hosts.deny, line 1577: bad option name: ....** warning message because of the symbol \`:' in the comment message
+- [x] (service) ban ips excluding \`refused connect from ...' in /var/log/auth.log
+- [ ] (ban message) enable to comment a **sentence**
+- [ ] (log) fix `-s` problem

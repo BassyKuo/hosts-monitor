@@ -37,7 +37,7 @@ show_help() {
 # ---[ Contents
 if [ $# -eq 0 ]; then
     print_header
-    cat ${report}* | grep --color=yes $(date -d today '+%F') | sort || echo "(empty)"
+    cat ${report}* | grep --color=yes $(date -d today '+%F') | sort || sed 1d $shortrepo
     exit 0
 fi
 while test $# -gt 0 ; do
@@ -111,7 +111,7 @@ while test $# -gt 0 ; do
                     ;;
             esac
             print_header
-            cat ${report}* | grep --color=${cop:-yes} -i "$pattern" | sort || echo "(empty)"
+            cat ${report}* | grep --color=${cop:-yes} -i "$pattern" | sort || sed 1d $shortrepo
             exit 0
             ;;
     esac
@@ -122,4 +122,4 @@ awk -v "idxes=$IDX" -v "strs=$STR" \
              n=split(strs, str, / +/); }
     { flag=1; for (i=2;i<=n;i++) {
         if (tolower($idx[i]) !~ tolower(str[i])) { flag=0; break; } }
-      if(flag) print $0 }' ${report}* | grep "\($(echo $STR | sed "s/ /\\\|/g;")\)" --color=${cop:-yes} | sort || echo "(empty)"
+      if(flag) print $0 }' ${report}* | grep "\($(echo $STR | sed "s/ /\\\|/g;")\)" --color=${cop:-yes} | sort || sed 1d $shortrepo
