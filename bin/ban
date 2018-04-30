@@ -35,12 +35,26 @@ ban_ip() {
 }
 unban_ip() {
     IP=$1
+    format="%-44s"
+    # Fail2ban unban
+    if which fail2ban-client > /dev/null ; then
+        printf $format ">>> Check$BOLD fail2ban$RESET service ..."
+        jails=$(fail2ban-client status | grep "Jail list" --color=no | sed "s/^.*Jail list:\s\+\(.*\)$/\1/g;")
+        for jail in $jails; do
+            fail2ban-client status $jail | grep -w $IP > /dev/null && ( \
+                fail2ban-client set $jail unbanip $IP > /dev/null
+                echo "$RED${BOLD}unban$RESET $IP"
+                ) || echo "(not found)"
+        done
+    fi
+
+    # hosts.deny line delete
+    printf $format ">>> Check$BOLD $hosts_deny$RESET ..."
     grep $IP $hosts_deny > /dev/null && ( \
         sed -i "/$IP\($\| \)/d" $hosts_deny
         update_repo "$(date '+%F %T') $PROG Manual:$USER_NAME null $IP Unban $2"
-        echo "$RED${BOLD}--- Unban$RESET $IP"
-        ) || \
-        errmsg "Cannot find $RED$BOLD$IP$RESET in $hosts_deny.  Please check if another ban-list is running or not."
+        echo "$RED${BOLD}unban$RESET $IP"
+        ) || echo "(not found)"
 }
 
 # ---[ Content

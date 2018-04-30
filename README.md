@@ -5,22 +5,37 @@
 
 The light service to manage suspicious hosts.  This repository contains:
 
-* **hosts-monitor.service** : 
-    the main daemon to ban the suspect per hour. 
+* **hosts-monitor.service** [./service]: 
+    the main service to ban the suspect per hour. 
 
-    * Default report: `/home/hosts-monitor.report`
-    * Default shortcut: `/etc/ssh/sshd_banner`
+* **hosts-monitor** [./bin]: 
+    user command to do the following actions:
 
-###### Above 2 paths set in `config` file.
-
-* **hosts-monitor** : 
-    user command to easily list log in hosts-monitor.report, show the ip status, ban/unban specific ips manually (root only), control `hosts-monitor.service` service to ON/OFF (root only), and set allow/deny rules to hosts-monitor.service.
-
-    * log path: `/home/hosts-monitor.report` 
-    * ban-list: `/etc/hosts.deny` (the only ban-list accessed.  If you unban unsuccessfully, check whether another ban-list is running or not.)
+    1. `log`:       list logs in hosts-monitor.report
+    2. `show`:      show ips' status
+    3. `ban`:       ban/unban specific ips manually (root only)
+    4. `service`:   stop/start/restart `hosts-monitor.service` service (root only)
+    5. `rule`:      set allow/deny rules to hosts-monitor.service
 
 * **config** :
-    the configure file including the report path, and allow/deny rules. edit this file if you need.
+    the configure file including the report path, and allow/deny rules. Split into 3 parts:
+
+```sh
+[env]
+# some environment variables to define
+# default:
+#   REPORT=/home/hosts-monitor.report
+#   SUBREPO=/etc/ssh/sshd_banner
+
+[allow]
+# some login rules always be ignored to ban
+
+[deny]
+# some login rules for connection denied
+
+```
+
+    Edit this file if you need.
 
 * **INSTALL** :
     * Default installation directory: `INSTALL_DIR=/opt/hosts-monitor`
@@ -38,6 +53,15 @@ or change the installation path:
 $ INSTALL_DIR=/opt/HM SERVICE=/etc/cron.daily ./INSTALL
 ```
 
+# Uninstall
+
+```sh
+$ cd $INSTALL_DIR
+$ ./uninstall
+
+rm: remove 1 argument recursively? y
+Uninstall completely.
+```
 
 
 ## Usage Examples
@@ -88,6 +112,11 @@ $ hosts-monitor rule --help
 Type `hosts-monitor help` for more description.
 
 
+# Bugs Report
+
+Welcome to make an issue if you have any problem!
+
+
 ## TODO
 #### r2.0.0
 - [x] Merge hosts-monitor & hosts-monitor.service (saved in `/opt/hosts-monitor`)
@@ -96,12 +125,16 @@ Type `hosts-monitor help` for more description.
 - [x] show the /etc/hosts.deny status
 
 #### r2.1.0
+* New features
 - [x] show ip status: add `--oneline` argument
 - [ ] `stat` : summary the ip (1) login times (2) login username (3) current status in report
 - [ ] ban list (like `$ fail2ban-client status sshd` + tree)
-- [x] [4/22 05:00 testing] (log) print short-report if empty
+- [ ] [4/22 05:00 testing] (log) print short-report if empty
+- [x] (ban) check `fail2ban` and unban
+- [ ] (ban message) enable to comment a **sentence**
+
+* Bug issues
 - [x] (ban) ban comment prompt ; unban bugs
 - [x] (hosts.deny) the comment prompt \`#' caused **error: /etc/hosts.deny, line 1577: bad option name: ....** warning message because of the symbol \`:' in the comment message
 - [x] (service) ban ips excluding \`refused connect from ...' in /var/log/auth.log
-- [ ] (ban message) enable to comment a **sentence**
 - [ ] (log) fix `-s` problem

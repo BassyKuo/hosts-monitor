@@ -17,14 +17,12 @@ SUBREPO=/etc/ssh/sshd_banner                          # cache (hourly update)
 
 # Ban ips with the follwoing pattern.
 [deny]
-ftp\w\+
-test\w\+
+ftp\w*
+test\w*
 guest
 ubuntu
 root
-admin
-admin\w\+
-test
+admin\w*
 user
 testuser
 
