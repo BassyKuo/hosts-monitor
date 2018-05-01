@@ -120,12 +120,6 @@ Welcome to raise the issue if you found bugs or have any problem when using this
 ---
 
 ## TODO
-#### r2.0.0
-- [x] Merge hosts-monitor & hosts-monitor.service (saved in `/opt/hosts-monitor`)
-- [x] Ban-Rule add: username
-- [x] Always-Allow: ip @ /etc/hosts.allow
-- [x] show the /etc/hosts.deny status
-
 #### r2.1.0
 ##### New features
 - [ ] `stat` : summary the ip (1) login times (2) login username (3) current status in report
@@ -135,8 +129,14 @@ Welcome to raise the issue if you found bugs or have any problem when using this
 - [x] (ban) check `fail2ban` and unban
 - [ ] (ban `-m`) enable to comment a **sentence**
 
-##### Bug issues
+##### Bug fixing
 - [x] (ban) ban comment prompt ; unban bugs
 - [x] (hosts.deny) the comment prompt \`#' caused **error: /etc/hosts.deny, line 1577: bad option name: ....** warning message because of the symbol \`:' in the comment message
 - [x] (service) ban ips excluding \`refused connect from ...' in /var/log/auth.log
 - [x] (log) fix `-S` problem
+
+#### r2.0.0
+- [x] Merge hosts-monitor & hosts-monitor.service (saved in `/opt/hosts-monitor`)
+- [x] Ban-Rule add: username
+- [x] Always-Allow: ip @ /etc/hosts.allow
+- [x] show the /etc/hosts.deny status
