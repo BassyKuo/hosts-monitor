@@ -12,15 +12,17 @@ SUBPROG=$(echo $0 | awk -F'/' '{print $NF}')
 
 # ---[ Help
 show_help() {
-    printf "%s\n" "Usage: $PROG $SUBPROG [<OPTION>] <IP>..."
+    printf "%s\n" "Usage: $PROG $SUBPROG [OPTIONS] <ip>..."
+    printf "%s\n" "       $PROG $SUBPROG --status"
     echo ""
     format="%s\t%s\t%s\n"
     ( \
-    printf $format "<OPTION>" "" ""
+    printf $format "OPTIONS" "" ""
     printf $format "   --log=ARG, -n=ARG " "show the login log in report "    "  ${UNDERLINE}ARG$RESET={yes|all,NUM,auto,no}"
     printf $format "   --oneline" "show the status in one-line " ""
     printf "\n"
-    printf $format "<IP>" "show the status of the specific ip" ""
+    printf $format "<ip>" "show the status of the specific ip" ""
+    printf $format "--status" "show banned ip list" ""
     ) | column -e -t -s "$TAB" | awk '{print "   "$0}'
     echo ""
     echo "Example:"
@@ -109,6 +111,11 @@ check_and_show_status() {
     fi
 }
 
+show_banned_list() {
+    printf "Banned IP List:\n"
+
+}
+
 # ---[ Content
 if [ $# -eq 0 ] ; then
     echo "$PROG $SUBPROG: invalid ip '$@'"
@@ -133,6 +140,10 @@ while test $# -gt 0 ; do
         --oneline*)
             #oneline=yes
             shift
+            ;;
+        --status)
+            show_banned_list
+            exit 0
             ;;
         -*)
             echo "$PROG $SUBPROG: invalid option '$@'"

@@ -15,14 +15,14 @@ show_help() {
     printf "%s\n" "Usage: $PROG $SUBPROG {-a,--set-allow} <pattern>"
     printf "%s\n" "       $PROG $SUBPROG {-d,--set-deny} <pattern>"
     printf "%s\n" "       $PROG $SUBPROG {-x,--remove} <pattern>"
-    printf "%s\n" "       $PROG $SUBPROG [--show]"
+    printf "%s\n" "       $PROG $SUBPROG --show"
     echo ""
     format="%s\t%s\t%s\n"
     ( \
     printf $format "-a,--set-allow <pattern>" "always accept the login with the pattern" "ex: rule --set-alow 114.89.62.1"
     printf $format "-d,--set-deny <pattern>" "always reject the login with the pattern" "ex: rule --set-deny root admin"
     printf $format "-x,--remove <pattern>" "cancel the rule" "ex: rule -x 114.89.62.1 root"
-    printf $format "[--show]" "show all rules" "ex: rule --show"
+    printf $format "--show" "show all rules" "ex: rule --show"
     ) | column -t -s "$TAB" | awk '{print "   "$0}'
     echo ""
     echo "You can also modify the config file to add rules."

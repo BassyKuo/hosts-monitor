@@ -5,10 +5,10 @@
 
 The light service to manage suspicious hosts.  This repository contains:
 
-* **hosts-monitor.service** [./service]: 
+* **[hosts-monitor.service](./service)** : 
     the main service to ban the suspect per hour. 
 
-* **hosts-monitor** [./bin]: 
+* **[hosts-monitor](./bin)** : 
     user command to do the following actions:
 
     1. `log`:       list logs in hosts-monitor.report
@@ -16,24 +16,25 @@ The light service to manage suspicious hosts.  This repository contains:
     3. `ban`:       ban/unban specific ips manually (root only)
     4. `service`:   stop/start/restart `hosts-monitor.service` service (root only)
     5. `rule`:      set allow/deny rules to hosts-monitor.service
+    6. `stat` (coming soon):      statistics of ip (1) login times (2) login username (3) current status in report
 
 * **config** :
-    the configure file including the report path, and allow/deny rules. Split into 3 parts:
+    the configure file including the report path, and allow/deny rules; split into 3 parts:
 
-```sh
-[env]
-# some environment variables to define
-# default:
-#   REPORT=/home/hosts-monitor.report
-#   SUBREPO=/etc/ssh/sshd_banner
+    ```sh
+    [env]
+    # some environment variables to define
+    # default:
+    #   REPORT=/home/hosts-monitor.report
+    #   SUBREPO=/etc/ssh/sshd_banner
 
-[allow]
-# some login rules always be ignored to ban
+    [allow]
+    # some login rules always be ignored to ban
 
-[deny]
-# some login rules for connection denied
+    [deny]
+    # some login rules for connection denied
 
-```
+    ```
 
     Edit this file if you need.
 
@@ -53,7 +54,7 @@ or change the installation path:
 $ INSTALL_DIR=/opt/HM SERVICE=/etc/cron.daily ./INSTALL
 ```
 
-# Uninstall
+## Uninstallation
 
 ```sh
 $ cd $INSTALL_DIR
@@ -112,10 +113,11 @@ $ hosts-monitor rule --help
 Type `hosts-monitor help` for more description.
 
 
-# Bugs Report
+## Bugs Report
 
-Welcome to make an issue if you have any problem!
+Welcome to raise the issue if you found bugs or have any problem when using this tools. :smile:
 
+---
 
 ## TODO
 #### r2.0.0
@@ -125,16 +127,16 @@ Welcome to make an issue if you have any problem!
 - [x] show the /etc/hosts.deny status
 
 #### r2.1.0
-* New features
-- [x] show ip status: add `--oneline` argument
+##### New features
 - [ ] `stat` : summary the ip (1) login times (2) login username (3) current status in report
-- [ ] ban list (like `$ fail2ban-client status sshd` + tree)
-- [ ] [4/22 05:00 testing] (log) print short-report if empty
+- [x] (show) `--oneline`: show ip status in one-line
+- [ ] (show) `--status`: show ban list (like `$ fail2ban-client status sshd` + tree)
+- [x] (log) `--tmp`: print short-report
 - [x] (ban) check `fail2ban` and unban
-- [ ] (ban message) enable to comment a **sentence**
+- [ ] (ban `-m`) enable to comment a **sentence**
 
-* Bug issues
+##### Bug issues
 - [x] (ban) ban comment prompt ; unban bugs
 - [x] (hosts.deny) the comment prompt \`#' caused **error: /etc/hosts.deny, line 1577: bad option name: ....** warning message because of the symbol \`:' in the comment message
 - [x] (service) ban ips excluding \`refused connect from ...' in /var/log/auth.log
-- [ ] (log) fix `-s` problem
+- [x] (log) fix `-S` problem
