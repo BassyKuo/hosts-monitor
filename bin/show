@@ -122,7 +122,7 @@ if [ $# -eq 0 ] ; then
     echo "Try '$PROG $SUBPROG --help' for more information."
     exit 0
 fi
-echo "$*" | grep "\s\-\-oneline" > /dev/null && oneline=yes
+echo "$*" | grep -w "\-\-oneline" > /dev/null && oneline=yes
 log_arg=$(echo "$*" | grep "\(\-\-log\|\-n\)" | sed "s/^.*\(--log\|-n\)[ =]*\([^ ]\+\).*$/\2/g")
 
 while test $# -gt 0 ; do
