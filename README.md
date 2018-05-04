@@ -112,6 +112,21 @@ $ hosts-monitor rule --help
 
 Type `hosts-monitor help` for more description.
 
+## DEMO
+
+### log
+
+![](./demo/log.png)
+
+### show
+![](./demo/show.png)
+
+### rule
+![](./demo/rule.png)
+
+### stat
+![](./demo/stat.png)
+
 
 ## Bugs Report
 

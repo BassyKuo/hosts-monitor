@@ -83,7 +83,6 @@ while test $# -gt 0 ; do
         "-S"|"--status")
             flag=1
             s=$(echo $2 | sed 's/[bB][aA][nN]/Ban/g; s/[uU][nN][bB][aA][nN]/Unban/g') #grep "^[Bb][Aa][Nn]" > /dev/null && s="^Ban" || s=$2
-            echo "KEY: $s"
             STR="$STR $s"
             IDX="$IDX 7"
             shift; shift;
