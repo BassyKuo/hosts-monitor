@@ -22,12 +22,13 @@ show_help() {
     printf $format "OPTIONS" "" ""
     printf $format "    --color={yes|no}" "highlight pattern or not" "[Default]: yes"
     printf "\n"
-    printf $format "-t,--time [TIME]" "list specific date log" "[TIME]={today,yesterday,3/3/2017,4/1}"
-    printf $format "-s,--service [SERVICE]" "list specific service log" "[SERVICE]={sshd,hosts-monitor}"
-    printf $format "-e,--event [EVENT]" "list specific event log" "[EVENT]={Invalid-User,Failed-Password,Manual}"
-    printf $format "-u,--user,--id [USERID]" "list specific login userid log" "[USERID]={admin,test,root,...}"
-    printf $format "-i,--ip [IP]" "list specific login ip log" "[IP]=xxx.xxx.xxx.xxx"
-    printf $format "-S,--status [STATUS]" "list specific ban/unban log" "[STATUS]={ban,unban}"
+    printf $format "-t,--time <TIME>" "list specific date log" "<TIME>={today,yesterday,3/3/2017,4/1}"
+    printf $format "-t <TIME1>,<TIME2>" "list log from TIME1 to TIME2" ""
+    printf $format "-s,--service <SERVICE>" "list specific service log" "<SERVICE>={sshd,hosts-monitor}"
+    printf $format "-e,--event <EVENT>" "list specific event log" "<EVENT>={Invalid-User,Failed-Password,Manual}"
+    printf $format "-u,--user,--id <USERID>" "list specific login userid log" "<USERID>={admin,test,root,...}"
+    printf $format "-i,--ip <IP>" "list specific login ip log" "<IP>=xxx.xxx.xxx.xxx"
+    printf $format "-S,--status <STATUS>" "list specific ban/unban log" "<STATUS>={ban,unban}"
     printf $format "-a,--all" "list all log"
     printf $format "--tmp" "show temp file (i.e.short-report)"
     printf $format "<pattern>" "search lines with the regex pattern" "ex: 'Ban', '^2018.*root', '\\(root\\|admin\\|user\\)'"
@@ -46,31 +47,41 @@ while test $# -gt 0 ; do
             exit 0
             ;;
         "-t"|"--time")
-            STR="$STR $(date -d ${2:-'today'} '+%F')"
-            IDX="$IDX 1"
+            flag=1
+            time1=`echo $2 | awk -F, '{print $1}'`
+            time2=`echo $2 | awk -F, '{print $2}'`
+            time2=${time2:-$time1}
+            #STR="$STR $(date -d ${time1:-'today'} '+%F')"
+            #IDX="$IDX 1"
+            timeseq=$(while test `date -d "$time1" '+%F'` != `date -d "$time2 + 1 day" '+%F'` ; do date -d "$time1" '+%F' ; time1=`date -d "$time1 + 1 days" '+%F'`; done)
             shift; shift;
             ;;
         "-s"|"--service")
+            flag=1
             STR="$STR $2"
             IDX="$IDX 3"
             shift; shift;
             ;;
         "-e"|"--event")
+            flag=1
             STR="$STR $2"
             IDX="$IDX 4"
             shift; shift;
             ;;
         "-u"|"--user"|"--id")
+            flag=1
             STR="$STR $2"
             IDX="$IDX 5"
             shift; shift;
             ;;
         "-i"|"--ip")
+            flag=1
             STR="$STR $2"
             IDX="$IDX 6"
             shift; shift;
             ;;
         "-S"|"--status")
+            flag=1
             s=$(echo $2 | sed 's/[bB][aA][nN]/Ban/g; s/[uU][nN][bB][aA][nN]/Unban/g') #grep "^[Bb][Aa][Nn]" > /dev/null && s="^Ban" || s=$2
             echo "KEY: $s"
             STR="$STR $s"
@@ -78,6 +89,7 @@ while test $# -gt 0 ; do
             shift; shift;
             ;;
         "-a"|"--all")
+            flag=1
             STR="$(date '+%Y')"
             IDX="1"
             shift;
@@ -123,7 +135,7 @@ while test $# -gt 0 ; do
 done
 
 print_header
-if [ -z "$STR" ] ; then
+if [ -z "$flag" ] ; then
     pattern=${pattern:-$(date -d today '+%F')}
 fi
 if [ -n "$pattern" ] ; then
@@ -131,10 +143,21 @@ if [ -n "$pattern" ] ; then
     cat ${report}* | grep --color=${cop:-yes} -i "$pattern" | sort
     grep "$pattern" ${report}* > /dev/null || echo "(NOT FOUND)"
 else
-    awk -v "idxes=$IDX" -v "strs=$STR" \
-        'BEGIN{    split(idxes, idx, / +/);
-                 n=split(strs, str, / +/); }
-        { flag=1; for (i=2;i<=n;i++) {
-            if (tolower($idx[i]) !~ tolower(str[i])) { flag=0; break; } }
-          if(flag) print $0 }' ${report}* | grep "\($(echo $STR | sed "s/ /\\\|/g;")\)" --color=${cop:-yes} | sort
+    if [ -z "$timeseq" ] ; then
+        awk -v "idxes=$IDX" -v "strs=$STR" \
+            'BEGIN{    split(idxes, idx, / +/);
+                     n=split(strs, str, / +/); }
+            { flag=1; for (i=2;i<=n;i++) {
+                if (tolower($idx[i]) !~ tolower(str[i])) { flag=0; break; } }
+              if(flag) print $0 }' ${report}* | grep "\($(echo $STR | sed "s/ /\\\|/g;")\)" --color=${cop:-yes} | sort
+    else
+        for t in $timeseq ; do
+            awk -v "idxes=$IDX 1" -v "strs=$STR $t" \
+                'BEGIN{    split(idxes, idx, / +/);
+                         n=split(strs, str, / +/); }
+                { flag=1; for (i=2;i<=n;i++) {
+                    if (tolower($idx[i]) !~ tolower(str[i])) { flag=0; break; } }
+                  if(flag) print $0 }' ${report}* | grep "\($(echo "$STR $t" | sed "s/ /\\\|/g;")\)" --color=${cop:-yes} | sort
+        done
+    fi
 fi

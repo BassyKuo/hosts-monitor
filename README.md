@@ -16,7 +16,7 @@ The light service to manage suspicious hosts.  This repository contains:
     3. `ban`:       ban/unban specific ips manually (root only)
     4. `service`:   stop/start/restart `hosts-monitor.service` service (root only)
     5. `rule`:      set allow/deny rules to hosts-monitor.service
-    6. `stat` (coming soon):      statistics of ip (1) login times (2) login username (3) current status in report
+    6. `stat` **BETA**:      statistics of ip (1) login times (2) login username (3) current status in report
 
 * **config** :
     the configure file including the report path, and allow/deny rules; split into 3 parts:
@@ -122,10 +122,11 @@ Welcome to raise the issue if you found bugs or have any problem when using this
 ## TODO
 #### r2.1.0
 ##### New features
-- [ ] `stat` : summary the ip (1) login times (2) login username (3) current status in report
+- [x] `stat` : summary the ip (1) login times (2) login username (3) current status in report
 - [x] (show) `--oneline`: show ip status in one-line
 - [ ] (show) `--status`: show ban list (like `$ fail2ban-client status sshd` + tree)
 - [x] (log) `--tmp`: print short-report
+- [x] (log) `--time <time1>,<time2>`: search time range <time1> to <time2>
 - [x] (ban) check `fail2ban` and unban
 - [ ] (ban `-m`) enable to comment a **sentence**
 
