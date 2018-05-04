@@ -41,7 +41,7 @@ show_help() {
 }
 
 # ---[ Functions
-format="%6s\t%-24s%-14s"
+format="%6s\t%-20s%-10s"        # Rank, UserID/IP, Times, (Status,) (Others)
 
 get_sourcelog() {
     duration=$($install_dir/bin/log ${timecmd:-'--all'} --color=no | sed '1,3d' | sed '1p;$p;d' | awk '{print $1}')
@@ -61,11 +61,12 @@ show_id_stat() {
     tmpfile=`tempfile`
     cmd=$*
     get_sourcelog
-    printf "$UNDERLINE$format%-120s$RESET\n" "Rank" "UserID" "Times" "Top-5"
+    printf "$UNDERLINE$format%-11s%-120s$RESET\n" "Rank" "UserID" "Times" "Status" "Top-5"
     printf "$format\n" `cat $sourcelog | awk '{if ($5) print $5}' | grep -v "\*" --color=no | sort | uniq -c | sort -k1nr | awk '{print $2"\t"$1}' | nl | $cmd` > $tmpfile
     ( \
         for userid in `awk '{print $2}' $tmpfile`; do
-            printf "%-16s%-6s" `grep -w $userid $sourcelog | awk '{print $6}' | sort | uniq -c | sort -k1nr | awk '{print $2" ("$1")"}' | head -n5`
+            printf "%-22s" `$install_dir/bin/rule --check "$userid" | awk '{print $2}'`
+            printf "%-16s%-6s" `awk '{if ($5 ~ /^'$userid'$/) print $6}' $sourcelog | sort | uniq -c | sort -k1nr | awk '{print $2" ("$1")"}' | head -n5`
             printf "\n"
         done ) | paste -d '' $tmpfile -
 }
@@ -74,11 +75,12 @@ show_ip_stat() {
     tmpfile=`tempfile`
     cmd=$*
     get_sourcelog
-    printf "$UNDERLINE$format%-120s$RESET\n" "Rank" "IP" "Times" "Login(top-15)"
+    printf "$UNDERLINE$format%-11s%-120s$RESET\n" "Rank" "IP" "Times" "Status" "Login(top-15)"
     printf "$format\n" `cat $sourcelog | awk '{if ($6) if ($5 !~ /\*/) print $6}' | grep "\([0-9]\{1,3\}\.\)\{1,3\}[0-9]\{1,3\}" --color=no | sort | uniq -c | sort -k1nr | awk '{print $2"\t"$1}' | nl | $cmd` > $tmpfile
     ( \
         for logip in `awk '{print $2}' $tmpfile`; do
-            printf "%s " `grep -w $logip $sourcelog | awk '{if ($5!~/\*/) print $5}' | sort | uniq -c | sort -k1nr | awk '{print $2"("$1")"}' | head -n15`
+            printf "%-22s" `$install_dir/bin/show --oneline "$logip" | awk '{print $1}'`
+            printf "%s " `awk '{if ($6 ~ /^'$logip'$/) if ($5!~/\*/) print $5}' $sourcelog | sort | uniq -c | sort -k1nr | awk '{print $2"("$1")"}' | head -n15`
             printf "\n"
         done ) | paste -d '' $tmpfile -
 }

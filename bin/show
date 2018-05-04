@@ -90,19 +90,19 @@ check_and_show_status() {
     ip=$1
     log_arg=$2
     oneline=$3
-    if grep "\s$1\s" $hosts_deny > /dev/null; then
-        comment=$(grep "\s$1\s" $hosts_deny | sed -n 's/^[^#]*# *//; $p')
+    if grep "\s$1\(\s\|$\)" $hosts_deny > /dev/null; then
+        comment=$(grep -w "$1" $hosts_deny | sed -n 's/^[^#]*# *//; $p')
         show_status $oneline $log_arg $1 "${RED}Ban$RESET" $hosts_deny $comment
 
-    elif grep "\s$1\s" $hosts_allow > /dev/null; then
-        comment=$(grep "\s$1\s" $hosts_allow | sed -n 's/^[^#]*# *//; $p')
+    elif grep "\s$1\(\|$\)" $hosts_allow > /dev/null; then
+        comment=$(grep -w "$1" $hosts_allow | sed -n 's/^[^#]*# *//; $p')
         show_status $oneline $log_arg $1 "${GREEN}Accept$RESET" $hosts_allow $comment
 
     else
-        if grep "\s$1" $hosts_deny > /dev/null; then
+        if grep -w "$1[0-9.]\+" $hosts_deny > /dev/null; then
             printf "${YELLOW}Cannot match $RED$BOLD$1$RESET ${YELLOW}Find similar case ...$RESET\n"
-            for ip in $(grep --color=no "\s$1" $hosts_deny | awk '{print $2}' | uniq); do
-                comment=$(grep "\s$ip" $hosts_deny | sed -n 's/^[^#]*# *//; $p')
+            for ip in $(grep --color=no -w "$1[0-9.]\+" $hosts_deny | awk '{print $2}' | uniq); do
+                comment=$(grep -w "$ip[0-9.]\+" $hosts_deny | sed -n 's/^[^#]*# *//; $p')
                 show_status $oneline $log_arg $ip "${RED}Ban$RESET" $hosts_deny $comment
             done
         else

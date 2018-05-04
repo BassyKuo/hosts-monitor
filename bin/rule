@@ -16,6 +16,7 @@ show_help() {
     printf "%s\n" "       $PROG $SUBPROG {-d,--set-deny} <pattern>"
     printf "%s\n" "       $PROG $SUBPROG {-x,--remove} <pattern>"
     printf "%s\n" "       $PROG $SUBPROG --show"
+    printf "%s\n" "       $PROG $SUBPROG --check <pattern>"
     echo ""
     format="%s\t%s\t%s\n"
     ( \
@@ -23,6 +24,7 @@ show_help() {
     printf $format "-d,--set-deny <pattern>" "always reject the login with the pattern" "ex: rule --set-deny root admin"
     printf $format "-x,--remove <pattern>" "cancel the rule" "ex: rule -x 114.89.62.1 root"
     printf $format "--show" "show all rules" "ex: rule --show"
+    printf $format "--check <pattern>" "check the pattern status under current rules" "ex: rule --check admin"
     ) | column -t -s "$TAB" | awk '{print "   "$0}'
     echo ""
     echo "You can also modify the config file to add rules."
@@ -41,6 +43,19 @@ show_rules() {
         printf "$RED%s$RESET\n" "$i"
     done
     exit 0
+}
+
+check_rules() {
+    pattern=$1
+    fetch_rules
+    if   echo $pattern | grep -w "$(echo $allow_rules | sed 's/ /\\|/g; s/^\(.*\)$/\\(\1\\)/g')" > /dev/null; then
+        printf "%-20s $GREEN%s$RESET\n" "$pattern" "Accept"
+    elif echo $pattern | grep -w "$(echo $deny_rules | sed 's/ /\\|/g; s/^\(.*\)$/\\(\1\\)/g')" > /dev/null; then
+        printf "%-20s $RED%s$RESET\n" "$pattern" "Deny"
+    else
+        printf "%-20s $GREEN%s$RESET\n" "$pattern" "Accept"
+    fi
+
 }
 
 # ---[ Content
@@ -85,6 +100,13 @@ while test $# -gt 0 ; do
             done
             echo ""
             show_rules
+            ;;
+        "--check")
+            shift
+            while test $# -gt 0; do
+                check_rules $1
+                shift
+            done
             ;;
         *)
             echo "$PROG $SUBPROG: invalid option '$@'"
