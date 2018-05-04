@@ -18,6 +18,7 @@ show_help() {
     printf $format "ban,unban" "ban/unban ip" "[root]"
     printf $format "service" "enable/disable/execute the hosts-monitor.service daemon" "[root]"
     printf $format "rule" "set allow/deny rules" "[root]"
+    printf $format "stat" "summary the login information" "(BETA)"
     ) | column -t -s "$TAB" | awk '{print "   "$0}'
     printf "\n%s\n" "Try '$PROG [COMMAND] --help' for more information."
 }
@@ -47,6 +48,10 @@ case $1 in
     "service")
         shift;
         install_dir=$INSTALL_DIR $INSTALL_DIR/bin/service $@
+        ;;
+    "stat")
+        shift;
+        install_dir=$INSTALL_DIR $INSTALL_DIR/bin/stat $@
         ;;
     *)
         echo "$PROG: invalid option '$@'"

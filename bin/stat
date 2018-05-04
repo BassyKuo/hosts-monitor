@@ -36,7 +36,7 @@ show_help() {
     echo "   $PROG $SUBPROG -id"
     echo "   $PROG $SUBPROG -id tail -n20"
     echo "   $PROG $SUBPROG -ip --all"
-    echo "   $PROG $SUBPROG -t yesterday today -ip --all"
+    echo "   $PROG $SUBPROG -t yesterday,today -ip --all"
     exit 0
 }
 
@@ -126,11 +126,11 @@ case $1 in
         cmd_filter $*
         show_ip_stat $cmd
         ;;
-    -*)
-        echo "$PROG $SUBPROG: invalid option '$@'"
-        echo "Try '$PROG $SUBPROG --help' for more information."
-        exit 0
-        ;;
+    #-*)
+        #echo "$PROG $SUBPROG: invalid option '$@'"
+        #echo "Try '$PROG $SUBPROG --help' for more information."
+        #exit 0
+        #;;
     *)
         cmd_filter $*
         show_all_stat $cmd
