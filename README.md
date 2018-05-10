@@ -145,6 +145,7 @@ Welcome to raise the issue if you found bugs or have any problem when using this
 - [x] (ban) check `fail2ban` and unban
 - [ ] (ban `-m`) enable to comment a **sentence**
 - [x] (rule `--check`) check the pattern status with current rules
+- [x] (service **BETA**) using `journalctl` to catch log
 
 ##### Bug fixing
 - [x] (ban) ban comment prompt ; unban bugs

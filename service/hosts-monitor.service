@@ -4,29 +4,23 @@
 # Destination : /etc/hosts.deny , /etc/hosts.allow
 # Report      : /home/hosts-monitor.report
 
-# Connection denied log : /var/log/hosts_deny.log
-
-# ==== /etc/crond.hourly/hosts-monitor.service @ 2018/4/22 by bassykuo <aaammmyyy27@gmail.com> ====
+# ==== /etc/crond.hourly/hosts-monitor.service @ 2018/5/9 by bassykuo <aaammmyyy27@gmail.com> ====
 
 INSTALL_DIR=/opt/hosts-monitor
 . $INSTALL_DIR/bin/profile
 
 #report=./report
 #shortrepo=./short
-#hosts_deny=hosts.deny
-connect_deny_log=/var/log/hosts_deny.log
+#hosts_deny=./hosts.deny
 
-Date=$(date -d "1 hour ago" '+%h %e %H %F %u')
-set $Date
-M=$1
-d=$2
-h=$3
-F=$4
-week=$5
+query_cmd='/bin/journalctl'
+fail2ban_cmd='/usr/bin/fail2ban-client'
+ban_list=`tempfile`
+time_str="1 hour ago"
 
 # Backup
 #   at 1st day 01:00 in month
-if [ $d -eq 1 ] && [ $h -eq 0 ]; then
+if [ `date +%a%H` = 'Mon01' ]; then
     for i in $(seq 5 -1 1); do
         mv $report.$i $report.$(($i+1))
     done
@@ -34,63 +28,61 @@ if [ $d -eq 1 ] && [ $h -eq 0 ]; then
 fi
 
 test -f $report || print_header >> $report
+rm -f $shortrepo
+touch $shortrepo
 fetch_rules
-refused_ip=`(zgrep "^${M}\s\+${d}\s\+${h}:.*: refused connect from .*([0-9]\+)$" /var/log/auth.log* | sed "s/.*(\([0-9.]\+\))$/\1/g"; awk '{print $2}' $hosts_deny) | grep --color=no "^[0-9]" | sort | uniq`
+refused_ip=`($query_cmd -t sshd --since "$time_str" | grep "refused connect from" | sed "s/.*(\([0-9.]\+\))$/\1/g"; awk '{print $2}' $hosts_deny) | grep --color=no "^[0-9]" | sort | uniq`
 
-# Always ban from /var/log/auth.log*
+# Always ban: (1) Failed-Password (2) Invalid-User in DenyRules (3) Retry-IP (4) from Fail2Ban
 ( \
-    # brute_force_ips
-    zgrep "^${M}\s\+${d}\s\+${h}:.* pam_unix(sshd:auth):.* rhost=[0-9\.]\+  user=" /var/log/auth.log* | \
-    awk '{print "'${F}' "$3" sshd Failed-Password "$15" "$14" "}' | sed -e 's/user=//g;s/rhost=//g';
-    # deny_rules
-    zgrep "^${M}\s\+${d}\s\+${h}:.* Invalid user .*[0-9]$" /var/log/auth.log* | \
-    awk '{print "'${F}' "$3" sshd Invalid-User "$8" "$10" "}' | grep --color=no "$(echo $deny_rules | sed 's/ / \\| /g; s/^\(.*\)$/\\( \1 \\)/g')";
-) | \
-    grep --color=no "\([0-9]\{1,3\}.\)\{3\}[0-9]\{1,3\}" | \
-    grep -v "$(echo $allow_rules | sed 's/ / \\| /g; s/^\(.*\)$/\\( \1 \\)/g')" | \
-    sort | \
-    awk -v "format=$FORMAT" \
-        'NF>0 { printf format, $1, $2, $3, $4, $5, $6, "Ban", "" }' | tee $shortrepo | \
-    #awk 'NF>0 {printf "ALL: %-18s : aclexec /bin/echo %s >> '$connect_deny_log'\n", $6, "`/bin/date --rfc-3339=seconds` [%d] from %a connection denied   # '$TIME' (DenyRule login="$5")" ;}' | \
-    awk -v "time_stamp=`date '+%F.%H-%M-%S'`" \
-        'NF>0 {printf "ALL: %-18s # %s (DenyRule login=%s)\n", $6, time_stamp, $5 ;}' | \
-    sort -k 2 -n | uniq >> /tmp/ban_ips.log
+    # Failed-Password
+    $query_cmd -t sshd --since "$time_str" | grep "authentication failure;.* user=" | \
+        awk 'NF>0{  cmd="date +%F -d"$1$2; (cmd | getline date);
+                print date" "$3" sshd Failed-Password "$15" "$14" "}' | sed -e 's/user=//g;s/rhost=//g' | tee -a $shortrepo | \
+        awk '{  gsub(":","-",$0);
+                printf "ALL: %-18s # %s (%s login=%s)\n", $6, $1"."$2, $4, $5;}';
 
-# Always ban from /var/log/fail2ban.log* and retry_ips from /var/log/auth.log*
-( \
-    # fail2ban_ip
-    zgrep "${F}\s\+${h}:.* Ban" /var/log/fail2ban.log* | \
-    #awk 'NF>0 {printf "ALL: %-18s : aclexec /bin/echo %s >> '$connect_deny_log'\n", $8, "`/bin/date --rfc-3339=seconds` [%d] from %a connection denied   # '$TIME' (Fail2ban)" ;}';
-    awk -v "time_stamp=`date '+%F.%H-%M-%S'`" \
-        'NF>0 {printf "ALL: %-18s # %s (Fail2ban)\n", $8, time_stamp;}';
-    # retry_ips
-    zgrep "^${M}\s\+${d}\s\+${h}:.* Invalid user .*[0-9]$" /var/log/auth.log* | \
-    #awk 'NF>0 {printf "ALL: %-18s : aclexec /bin/echo %s >> '$connect_deny_log'\n", $10, "`/bin/date --rfc-3339=seconds` [%d] from %a connection denied   # '$TIME' (Retry-BruteForce)" ;}' | \
-    awk -v "time_stamp=`date '+%F.%H-%M-%S'`" \
-        'NF>0 {printf "ALL: %-18s # %s (Retry-BruteForce)\n", $10, time_stamp;}' | \
-    uniq -d;
+    # Deny-Rules
+    $query_cmd -t sshd --since "$time_str" | grep "Invalid user" | \
+        awk 'NF>0{  cmd="date +%F -d"$1$2; (cmd | getline date);
+                print date" "$3" sshd Invalid-User "$8" "$10" "}' | tee -a $shortrepo | \
+        grep --color=no "$(echo $deny_rules | sed 's/ / \\| /g; s/^\(.*\)$/\\( \1 \\)/g')" | \
+        awk '{  gsub(":","-",$0);
+                printf "ALL: %-18s # %s (DenyRule login=%s)\n", $6, $1"."$2, $5;}';
+
+    # Retry-IP
+    $query_cmd -t sshd --since "$time_str" | grep "Invalid user" | \
+        awk '{  cmd="date +%F -d"$1$2; (cmd | getline date);
+                gsub(":","-",$0);
+                printf "ALL: %-18s # %s (Retry-BruteForce)\n", $10, date"."$3;}' | \
+        sort -k2,2 -n | uniq -d -w21;
+
+    # Fail2Ban
+    ## **DEPRECATED** -------------------------------------------------
+    ##      `Ban from fail2ban` will be deprecated in the version 3.0.
+    ## ----------------------------------------------------------------
+    zgrep "Ban" /var/log/fail2ban.log* | \
+        sed "s/^[^:]\+:\([^,]\+\),[0-9]\+ .* \(\([0-9]\+\.\)\{3\}[0-9]\+\)$/\1 \2/g" | \
+        #awk -v "onehourago=`date +%s -d'1 hour ago'`" \
+            #'NF>0 { cmd="date +%s -d"$1"\\t"$2; 
+              #(cmd | getline t); 
+              #if (t > onehourago) print $1" "$2" "$3; 
+              #close(cmd); }';
+        awk '{  gsub(":","-",$0);
+                printf "ALL: %-18s # %s (Fail2ban)\n", $3, $1"."$2; }';
 ) | \
     grep --color=no "\([0-9]\{1,3\}.\)\{3\}[0-9]\{1,3\}" | \
     grep -v "$(echo $allow_rules | sed 's/ / \\| /g; s/^\(.*\)$/\\( \1 \\)/g')" | \
     awk -v "refused_ip=$refused_ip" \
         'NF>0  { if( ! index(refused_ip, $2)) print $0; }' | \
-    sort -u -k 2 -n >> /tmp/ban_ips.log
+    sort -k2,2 -n | uniq -w21 > $ban_list
 
-# Warning ips from /var/log/auth.log*
-( \
-    # warning_ips
-    zgrep "^${M}\s\+${d}\s\+${h}:.* Invalid user .*[0-9]$" /var/log/auth.log* | \
-    awk '{print "'${F}' "$3" sshd Invalid-User "$8" "$10}'
-) | \
-    sort | \
-    awk -v "format=$FORMAT" \
-        'NF>0 { printf format, $1, $2, $3, $4, $5, $6, "", "" }' | tee -a $shortrepo > /dev/null
 
-ban_ip=$(awk 'NF>0 {print $2}' /tmp/ban_ips.log)
-cat /tmp/ban_ips.log >> $hosts_deny
-rm -f /tmp/ban_ips.log
+ban_ip=$(awk 'NF>0 {print $2}' $ban_list)
+cat $ban_list >> $hosts_deny
+rm -f $ban_list
 
-sort -k 2 $shortrepo | \
+sort $shortrepo | \
     awk -v "ban_ip=$ban_ip" -v "format=$FORMAT" \
         'NF>0  { if(index(ban_ip, $6)) $7="Ban";
                 printf format, $1, $2, $3, $4, $5, $6, $7, "" }' | uniq | tee $shortrepo >> $report

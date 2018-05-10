@@ -82,7 +82,7 @@ case $1 in
                 fi
                 while test $# -gt 0; do
                     check_ip $1 && IP=$1 || exit 1
-                    test $choice = 'ban' && ban_ip $IP $(echo $comment | sed 's/ /_/g; s/\:/-/g') || unban_ip $IP $(echo $comment | sed 's/ /_/g; s/\:/-/g')
+                    test $choice = 'ban' && ban_ip $IP $(echo $comment | tr ' :' '-') || unban_ip $IP $(echo $comment | tr ' :' '-')
                     shift
                 done
                 test $choice = 'ban' && (echo ; cat $shortrepo)
