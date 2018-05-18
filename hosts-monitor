@@ -32,26 +32,26 @@ case $1 in
         ;;
     "log")
         shift;
-        install_dir=$INSTALL_DIR $INSTALL_DIR/bin/log $@
+        install_dir=$INSTALL_DIR $INSTALL_DIR/bin/log "$@"
         ;;
     "ban"|"unban")
-        install_dir=$INSTALL_DIR $INSTALL_DIR/bin/ban $@
+        install_dir=$INSTALL_DIR $INSTALL_DIR/bin/ban "$@"
         ;;
     "show")
         shift;
-        install_dir=$INSTALL_DIR $INSTALL_DIR/bin/show $@
+        install_dir=$INSTALL_DIR $INSTALL_DIR/bin/show "$@"
         ;;
     "rule")
         shift;
-        install_dir=$INSTALL_DIR $INSTALL_DIR/bin/rule $@
+        install_dir=$INSTALL_DIR $INSTALL_DIR/bin/rule "$@"
         ;;
     "service")
         shift;
-        install_dir=$INSTALL_DIR $INSTALL_DIR/bin/service $@
+        install_dir=$INSTALL_DIR $INSTALL_DIR/bin/service "$@"
         ;;
     "stat")
         shift;
-        install_dir=$INSTALL_DIR $INSTALL_DIR/bin/stat $@
+        install_dir=$INSTALL_DIR $INSTALL_DIR/bin/stat "$@"
         ;;
     *)
         echo "$PROG: invalid option '$@'"

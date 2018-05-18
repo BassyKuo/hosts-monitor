@@ -30,14 +30,14 @@ show_help() {
 time_stamp=`echo "$TIME" | tr ':' '-'`
 
 ban() {
-    IP="$1"; check_ip "$IP" || exit 0
+    IP="$1"; check_ip "$IP" || return 0
     message="$2"
     printf "ALL: %-18s # $time_stamp (+$USER_NAME) %s\n" "$IP" "$(echo "$message" | tr ':' '-')" >> $hosts_deny
     update_repo "$(date '+%F %T') $PROG Manual:$USER_NAME null $IP Ban "$message""
     echo "$GREEN$BOLD+++ Ban$RESET $IP"
 }
 unban() {
-    IP="$1"; check_ip "$IP" || exit 0
+    IP="$1"; check_ip "$IP" || return 0
     message="$2"
     format="%-44s"
     printf "${RED}$IP$RESET\n"
