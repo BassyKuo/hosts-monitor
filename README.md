@@ -143,7 +143,7 @@ Welcome to raise the issue if you found bugs or have any problem when using this
 - [x] (log) `--tmp`: print short-report
 - [x] (log) `--time <time1>,<time2>`: search time range <time1> to <time2>
 - [x] (ban) check `fail2ban` and unban
-- [ ] (ban `-m`) enable to comment a **sentence**
+- [x] (ban `-m`) enable to comment a **sentence**
 - [x] (rule `--check`) check the pattern status with current rules
 - [x] (service **BETA**) using `journalctl` to catch log
 

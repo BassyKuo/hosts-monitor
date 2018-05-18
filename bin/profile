@@ -6,7 +6,7 @@ SERVICE=/etc/cron.hourly/hosts-monitor-service
 
 PROG="hosts-monitor"
 FORMAT="%-13s%-11s%-15s%-19s%-16s%-17s%-10s%-7s\n"
-HEADER="Date Time Service Event UserID SourceIP Status Remark"
+HEADER="Date Time Service Event UserID SourceIP Status Note"
 LINE_LENGTH=$(printf $FORMAT $HEADER | wc -L)
 FOOTER="[ $(date '+%F %R') UPDATE ]"
 TIME=$(date '+%F.%T')
@@ -61,17 +61,12 @@ print_footer() {
             { for(i=1;i<=(len-$1)/2;i++) printf "-"; printf "\n" }'
 }
 update_repo() {
-    tmp="$shortrepo.tmp"
     sed -i '/--\[.*\]--/d' $shortrepo
-    ( ( \
-    cat $shortrepo;
     echo $@ | \
         awk -v "format=$FORMAT" \
-            'NF>0  { gsub("null","*",$5); printf format, $1, $2, $3, $4, $5, $6, $7, $8 }' | tee -a $report \
-    ) | \
-    column -t -s' ';
-    #print_footer \
-    ) | tee $tmp > /dev/null
-    mv $tmp $shortrepo
+            'NF>0  { gsub("null","*",$5); 
+                     if (NF >= 8) $8 = substr($0, index($0,$8)); 
+                     printf format, $1, $2, $3, $4, $5, $6, $7, $8 }' | tee -a $report | \
+    tee -a $shortrepo > /dev/null
 }
 
