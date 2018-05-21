@@ -12,6 +12,7 @@ INSTALL_DIR=/opt/hosts-monitor
 #report=./report
 #shortrepo=./short
 #hosts_deny=./hosts.deny
+shorttemp=`tempfile`
 
 query_cmd='/bin/journalctl'
 fail2ban_cmd='/usr/bin/fail2ban-client'
@@ -30,7 +31,7 @@ fi
 
 test -f $report || print_header >> $report
 
-printf "" > $shortrepo
+rm -f $shortrepo
 fetch_rules
 refused_ip=`awk '{print $2}' $hosts_deny | grep --color=no "^[0-9]" | sort | uniq`
 
@@ -93,6 +94,7 @@ rm -f $ban_list
 sort $shortrepo | \
     awk -v "ban_ip=$ban_ip" -v "format=$FORMAT" \
         'NF>0  { if(index(ban_ip, $6)) $7="Ban";
-                printf format, $1, $2, $3, $4, $5, $6, $7, ""; }' | tee $shortrepo >> $report
+                printf format, $1, $2, $3, $4, $5, $6, $7, ""; }' | tee $shorttemp >> $report
+mv $shorttemp $shortrepo
 sed -i 1i"$(printf $FORMAT $HEADER)" $shortrepo
 #column -t $shortrepo
