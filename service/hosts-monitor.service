@@ -95,6 +95,6 @@ sort $shortrepo | \
     awk -v "ban_ip=$ban_ip" -v "format=$FORMAT" \
         'NF>0  { if(index(ban_ip, $6)) $7="Ban";
                 printf format, $1, $2, $3, $4, $5, $6, $7, ""; }' | tee $shorttemp >> $report
-mv $shorttemp $shortrepo
+cat $shorttemp > $shortrepo && rm -f $shorttemp
 sed -i 1i"$(printf $FORMAT $HEADER)" $shortrepo
 #column -t $shortrepo
