@@ -12,7 +12,7 @@ INSTALL_DIR=/opt/hosts-monitor
 #report=./report
 #shortrepo=./short
 #hosts_deny=./hosts.deny
-shorttemp=`tempfile`
+shorttemp="$shortrepo.tmp"
 
 query_cmd='/bin/journalctl'
 fail2ban_cmd='/usr/bin/fail2ban-client'
@@ -33,7 +33,7 @@ test -f $report || print_header >> $report
 
 rm -f $shortrepo
 fetch_rules
-refused_ip=`awk '{print $2}' $hosts_deny | grep --color=no "^[0-9]" | sort | uniq`
+refused_ip=`awk '{print $2}' $hosts_deny | grep --color=no "^[0-9]" | sort | uniq | awk '{print " "$0" "}'`
 
 # Always ban: (1) Failed-Password (2) Invalid-User in DenyRules (3) Retry-IP (4) from Fail2Ban
 ( \
@@ -82,8 +82,8 @@ refused_ip=`awk '{print $2}' $hosts_deny | grep --color=no "^[0-9]" | sort | uni
 ) | \
     grep --color=no "\([0-9]\{1,3\}.\)\{3\}[0-9]\{1,3\}" | \
     grep -v "$(echo $allow_rules | sed 's/ / \\| /g; s/^\(.*\)$/\\( \1 \\)/g')" | \
-    awk -v "refused_ip=$refused_ip" \
-        'NF>0  { if( ! index(refused_ip, $2)) print $0; }' | \
+    awk -v refused_ip="$refused_ip" \
+        'NF>0  { if( ! match(refused_ip, " "$2" ")) print $0; }' | \
     sort -k2,2 -n | uniq -w21 > $ban_list
 
 
@@ -95,6 +95,6 @@ sort $shortrepo | \
     awk -v "ban_ip=$ban_ip" -v "format=$FORMAT" \
         'NF>0  { if(index(ban_ip, $6)) $7="Ban";
                 printf format, $1, $2, $3, $4, $5, $6, $7, ""; }' | tee $shorttemp >> $report
-cat $shorttemp > $shortrepo && rm -f $shorttemp
+mv $shorttemp $shortrepo
 sed -i 1i"$(printf $FORMAT $HEADER)" $shortrepo
 #column -t $shortrepo
