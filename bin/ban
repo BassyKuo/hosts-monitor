@@ -63,6 +63,11 @@ unban() {
 }
 
 # ---[ Content
+if [ "$USER" != "root" ] ; then
+    errmsg "You must be a root!"
+    exit 0
+fi
+
 choice="$1"
 
 shift;

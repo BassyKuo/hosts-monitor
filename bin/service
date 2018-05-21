@@ -26,6 +26,11 @@ show_help() {
 }
 
 # ---[ Content
+if [ "$USER" != "root" ] ; then
+    errmsg "You must be a root!"
+    exit 0
+fi
+
 case $1 in
     "-h"|"--help"|"help")
         show_help
