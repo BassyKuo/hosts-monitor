@@ -6,7 +6,6 @@
 
 # ==== /etc/crond.hourly/hosts-monitor-service @ 2018/5/22 by bassykuo <aaammmyyy27@gmail.com> ====
 
-#INSTALL_DIR=/opt/hosts-monitor
 . $install_dir/bin/profile
 
 #report=./report
@@ -64,7 +63,7 @@ log "(start) SCAN $since_time to $now_time"
         awk '{  gsub(":","-",$0);
                 printf "ALL: %-18s # %s (DenyRule login=%s)\n", $6, $1"."$2, $5;}';
 
-    debug_log $shorttemp "shorttemp"       # Debug logger
+    test $debug_mode -eq 1 && debug_log $shorttemp "shorttemp"       # Debug logger
 
     # Retry-IP
     $query_cmd -t sshd --since="$since_time" --until="$now_time" | grep --color=no "sshd\[[0-9]\+\]: Failed password for invalid user [^ ]\+ from" | \
@@ -88,7 +87,7 @@ log "(start) SCAN $since_time to $now_time"
         'NF>0  { if( ! match(refused_ip, " "$2" ")) print $0; }' | \
     sort -k2,2 -n | uniq -w21 > $ban_list
 
-debug_log $ban_list "ban_list"       # Debug logger
+test $debug_mode -eq 1 && debug_log $ban_list "ban_list"       # Debug logger
 
 ban_ip=$(awk 'NF>0 {print " "$2" "}' $ban_list)
 cat $ban_list >> $hosts_deny
@@ -99,7 +98,7 @@ uniq | \
     awk -v ban_ip="$ban_ip" -v "format=$FORMAT" \
         'NF>0  { if( match(ban_ip, " "$6" ")) $7="Ban";
                  printf format, $1, $2, $3, $4, $5, $6, $7, ""; }' | tee $shortrepo >> $report
-debug_log $shortrepo "shortrepo"       # Debug logger
+test $debug_mode -eq 1 && debug_log $shortrepo "shortrepo"       # Debug logger
 rm -f $shorttemp
 sed -i 1i"$(printf $FORMAT $HEADER)" $shortrepo
 #column -t $shortrepo

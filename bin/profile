@@ -23,8 +23,9 @@ sed -n '/^#.*/d; 1,/\[env\]/d; /\[\w\+\]/,$d; /^$/d; p' $CONFIG > $config_temp
 
 hosts_deny=/etc/hosts.deny
 hosts_allow=/etc/hosts.allow
-report=${REPORT:-/home/hosts-monitor.report}
-shortrepo=${SUBREPO:-/etc/ssh/sshd_banner}
+report=${REPORT_LOC:-/home}/hosts-monitor.report
+shortrepo=${REPORT_NEW:-/etc/ssh/sshd_banner}
+debug_mode=${DEBUG_MODE:-0}
 
 UNDERLINE=$(tput smul)
 BOLD=$(tput bold)
