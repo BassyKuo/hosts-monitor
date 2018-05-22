@@ -6,7 +6,8 @@
 
 # ==== /etc/crond.hourly/hosts-monitor-service @ 2018/5/22 by bassykuo <aaammmyyy27@gmail.com> ====
 
-. $install_dir/bin/profile
+INSTALL_DIR=/opt/hosts-monitor
+. ${install_dir:-$INSTALL_DIR}/bin/profile
 
 #report=./report
 #shortrepo=./short
