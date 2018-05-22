@@ -4,10 +4,10 @@
 # Destination : /etc/hosts.deny , /etc/hosts.allow
 # Report      : /home/hosts-monitor.report
 
-# ==== /etc/crond.hourly/hosts-monitor.service @ 2018/5/9 by bassykuo <aaammmyyy27@gmail.com> ====
+# ==== /etc/crond.hourly/hosts-monitor-service @ 2018/5/22 by bassykuo <aaammmyyy27@gmail.com> ====
 
-INSTALL_DIR=/opt/hosts-monitor
-. $INSTALL_DIR/bin/profile
+#INSTALL_DIR=/opt/hosts-monitor
+. $install_dir/bin/profile
 
 #report=./report
 #shortrepo=./short
@@ -96,7 +96,7 @@ rm -f $ban_list
 
 sort $shorttemp | \
 uniq | \
-    awk -v ban_ip="$ban_ip" allow_rules="$allow_rules" -v "format=$FORMAT" \
+    awk -v ban_ip="$ban_ip" -v "format=$FORMAT" \
         'NF>0  { if( match(ban_ip, " "$6" ")) $7="Ban";
                  printf format, $1, $2, $3, $4, $5, $6, $7, ""; }' | tee $shortrepo >> $report
 debug_log $shortrepo "shortrepo"       # Debug logger

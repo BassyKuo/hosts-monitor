@@ -2,8 +2,8 @@
 # READ ONLY!
 
 INSTALL_DIR=/opt/hosts-monitor
-SERVICE=/etc/cron.hourly/hosts-monitor-service
 
+SERVICE=service/hosts-monitor-service
 PROG="hosts-monitor"
 FORMAT="%-13s%-11s%-15s%-19s%-16s%-17s%-10s%-7s\n"
 HEADER="Date Time Service Event UserID SourceIP Status Note"
@@ -40,8 +40,8 @@ log() {
 }
 debug_log() {
     filename="$1"
-    note="${2:+"+${2}$TAB"}"
-    cat $filename | awk '{print "(DEBUG)'$note' "$0;}' | logger -t "$PROG" -p "local7.notice"
+    note="$2"
+    cat $filename | awk -v note="$note" '{print "(DEBUG) "note"\t"$0;}' | logger -t "$PROG" -p "local7.notice"
 }
 check_ip() {
     IP=$1

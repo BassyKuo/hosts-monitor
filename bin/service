@@ -37,14 +37,14 @@ case $1 in
         exit 0
         ;;
     "-a"|"start")
-        chmod +x $SERVICE
+        install_dir=$install_dir chmod +x $install_dir/$SERVICE
         ;;
     "-x"|"stop")
-        chmod -x $SERVICE
+        install_dir=$install_dir chmod -x $install_dir/$SERVICE
         ;;
     "-r"|"restart")
-        chmod +x $SERVICE
-        $SERVICE
+        install_dir=$install_dir chmod +x $install_dir/$SERVICE
+        install_dir=$install_dir $install_dir/$SERVICE
         ;;
     *)
         echo "$PROG $SUBPROG: invalid option '$@'"
