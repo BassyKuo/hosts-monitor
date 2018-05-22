@@ -9,7 +9,7 @@ read -p "Backup reports ? [Y/n] " ans
 if [[ $ans =~ ^[yY]*$ ]]; then 
     read -p "     backup to ? [$HOME/hosts-monitor-reports] " bak_folder
     bak_folder=${bak_folder:-$HOME/hosts-monitor-reports}
-    test -d $bak_folder || mkdir $bak_folder
+    test -d $bak_folder || mkdir -p $bak_folder
     cp $report* $bak_folder
 fi
 sudo rm $SERVICE

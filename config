@@ -6,7 +6,7 @@
 # Set location of the following items.
 # comment it if you wanna use default value.
 [env]
-REPORT_LOC=$INSTALL_DIR/reports/                      # reports saved folder
+REPORT_LOC=/var/log/hosts-monitor/                    # reports saved folder
 REPORT_NEW=/etc/ssh/sshd_banner                       # cache (hourly update)
 DEBUG_MODE=1                                          # 1: turn-on, 0: turn-off
 

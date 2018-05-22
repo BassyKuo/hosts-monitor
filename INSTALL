@@ -20,7 +20,6 @@ printf "%s\n" ">>> Install hosts-monitor in $INSTALL_DIR..."
 
 ( \
 sed -i "s/INSTALL_DIR=.*/INSTALL_DIR=${INSTALL_DIR//\//\\/}/g" hosts-monitor
-#sed -i "s/INSTALL_DIR=.*/INSTALL_DIR=${INSTALL_DIR//\//\\/}/g" service/hosts-monitor-service
 sed -i "s/INSTALL_DIR=.*/INSTALL_DIR=${INSTALL_DIR//\//\\/}/g" bin/profile
 sed -i "s/SERVICE=.*/SERVICE=${SERVICE//\//\\/}/g" bin/profile
 sed -i "s/CMD=.*/CMD=${CMD//\//\\/}/g" bin/profile
@@ -28,4 +27,7 @@ sed -i "s/CMD=.*/CMD=${CMD//\//\\/}/g" bin/profile
 sudo cp -r . $INSTALL_DIR
 sudo ln -s $INSTALL_DIR/service/hosts-monitor-service $SERVICE
 sudo ln -s $INSTALL_DIR/hosts-monitor $CMD
+
+. bin/profile
+test -d $REPORT_LOC || mkdir -p $REPORT_LOC
 ) && printf "\033[32m%s\033[0m\n" "Setup successfully."
