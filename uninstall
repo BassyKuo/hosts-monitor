@@ -6,6 +6,6 @@
 . bin/profile
 ( \
 sudo rm $SERVICE
-sudo rm /usr/local/bin/hosts-monitor
+sudo rm $CMD
 sudo rm -r -I $INSTALL_DIR
 ) && printf "\033[31m%s\033[0m\n" "Uninstall completely."

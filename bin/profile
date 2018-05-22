@@ -2,8 +2,11 @@
 # READ ONLY!
 
 INSTALL_DIR=/opt/hosts-monitor
+SERVICE=/etc/cron.hourly/hosts-monitor-service
+CMD=/usr/local/bin/hosts-monitor
 
-SERVICE=service/hosts-monitor-service
+# ---[ Local Variables
+SERVICE_NAME="service/hosts-monitor-service"
 PROG="hosts-monitor"
 FORMAT="%-13s%-11s%-15s%-19s%-16s%-17s%-10s%-7s\n"
 HEADER="Date Time Service Event UserID SourceIP Status Note"
@@ -13,9 +16,9 @@ TIME=$(date '+%F.%T')
 USER_NAME=$(who -m | awk '{print $1}')
 
 CONFIG=$INSTALL_DIR/config
-cp $CONFIG /tmp/.hm.config
-sed -n -i '/#.*/d; 1,/\[env\]/d; /\[\w\+\]/,$d; /^$/d; p' /tmp/.hm.config
-. /tmp/.hm.config && rm -f /tmp/.hm.config
+config_temp=`tempfile`
+sed -n '/^#.*/d; 1,/\[env\]/d; /\[\w\+\]/,$d; /^$/d; p' $CONFIG > $config_temp
+. $config_temp && rm -f $config_temp
 
 
 hosts_deny=/etc/hosts.deny
