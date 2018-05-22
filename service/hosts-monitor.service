@@ -17,54 +17,56 @@ shorttemp="$shortrepo.tmp"
 query_cmd='/bin/journalctl'
 fail2ban_cmd='/usr/bin/fail2ban-client'
 ban_list=`tempfile`
-since_time="`date -d'61 minutes ago' '+%F %T'`"
+since_time="`date -d'60 min ago' '+%F %T'`"
 now_time="`date '+%F %T'`"
 
+# -----------------------------
 # Backup
 #   at 1st day 01:00 in month
+# -----------------------------
 if [ `date +%d%H` = '0101' ]; then
+    log "(start) BACKUP $report"
     for i in $(seq 5 -1 1); do
         mv $report.$i $report.$(($i+1))
     done
     mv $report $report.1
+    log "(end) BACKUP $report"
 fi
 
 test -f $report || print_header >> $report
 
-rm -f $shortrepo
+rm -f $shorttemp
 fetch_rules
 refused_ip=`awk '{print $2}' $hosts_deny | grep --color=no "^[0-9]" | sort | uniq | awk '{print " "$0" "}'`
 
+# ------------
+# System Log
+# ------------
+log "(start) SCAN $since_time to $now_time"
+
+
+# ----------------------------------------------------------------------------------------------
 # Always ban: (1) Failed-Password (2) Invalid-User in DenyRules (3) Retry-IP (4) from Fail2Ban
+# ----------------------------------------------------------------------------------------------
 ( \
     # Failed-Password
-    #$query_cmd -t sshd --since="$since_time" --until="$now_time" | grep --color=no "pam_unix(sshd:auth): authentication failure;.* user=" | \
-        #awk 'NF>0{  cmd="date +%F -d"$1$2; (cmd | getline date);
-                #print date" "$3" sshd Failed-Password "$15" "$14" "}' | sed -e 's/user=//g;s/rhost=//g' | tee -a $shortrepo | \
-        #awk '{  gsub(":","-",$0);
-                #printf "ALL: %-18s # %s (%s login=%s)\n", $6, $1"."$2, $4, $5;}';
     $query_cmd -t sshd --since="$since_time" --until="$now_time" | grep --color=no "sshd\[[0-9]\+\]: Failed password for [^ ]\+ from" | \
         awk 'NF>0{  cmd="date +%F -d"$1$2; (cmd | getline date);
-                print date" "$3" sshd Failed-Password "$9" "$11" "}' | tee -a $shortrepo | \
+                print date" "$3" sshd Failed-Password "$9" "$11" "}' | tee -a $shorttemp | \
         awk '{  gsub(":","-",$0);
                 printf "ALL: %-18s # %s (Failed-Password login=%s)\n", $6, $1"."$2, $5;}';
 
     # Deny-Rules
-    #$query_cmd -t sshd --since="$since_time" --until="$now_time" | grep --color=no "Invalid user" | \
-        #awk 'NF>0{  cmd="date +%F -d"$1$2; (cmd | getline date);
-                #print date" "$3" sshd Invalid-User "$8" "$10" "}' | tee -a $shortrepo | \
-        #grep --color=no "$(echo $deny_rules | sed 's/ / \\| /g; s/^\(.*\)$/\\( \1 \\)/g')" | \
-        #awk '{  gsub(":","-",$0);
-                #printf "ALL: %-18s # %s (DenyRule login=%s)\n", $6, $1"."$2, $5;}';
     $query_cmd -t sshd --since="$since_time" --until="$now_time" | grep --color=no "sshd\[[0-9]\+\]: Failed password for invalid user [^ ]\+ from" | \
         awk 'NF>0{  cmd="date +%F -d"$1$2; (cmd | getline date);
-                print date" "$3" sshd Invalid-User "$11" "$13" "}' | tee -a $shortrepo | \
+                print date" "$3" sshd Invalid-User "$11" "$13" "}' | tee -a $shorttemp | \
         grep --color=no "$(echo $deny_rules | sed 's/ / \\| /g; s/^\(.*\)$/\\( \1 \\)/g')" | \
         awk '{  gsub(":","-",$0);
                 printf "ALL: %-18s # %s (DenyRule login=%s)\n", $6, $1"."$2, $5;}';
 
+    debug_log $shorttemp "shorttemp"       # Debug logger
+
     # Retry-IP
-    #$query_cmd -t sshd --since="$since_time" --until="$now_time" | grep --color=no "Invalid user" | \
     $query_cmd -t sshd --since="$since_time" --until="$now_time" | grep --color=no "sshd\[[0-9]\+\]: Failed password for invalid user [^ ]\+ from" | \
         awk '{  cmd="date +%F -d"$1$2; (cmd | getline date);
                 gsub(":","-",$0);
@@ -86,15 +88,22 @@ refused_ip=`awk '{print $2}' $hosts_deny | grep --color=no "^[0-9]" | sort | uni
         'NF>0  { if( ! match(refused_ip, " "$2" ")) print $0; }' | \
     sort -k2,2 -n | uniq -w21 > $ban_list
 
+debug_log $ban_list "ban_list"       # Debug logger
 
-ban_ip=$(awk 'NF>0 {print $2}' $ban_list)
+ban_ip=$(awk 'NF>0 {print " "$2" "}' $ban_list)
 cat $ban_list >> $hosts_deny
 rm -f $ban_list
 
-sort $shortrepo | \
-    awk -v "ban_ip=$ban_ip" -v "format=$FORMAT" \
-        'NF>0  { if(index(ban_ip, $6)) $7="Ban";
-                printf format, $1, $2, $3, $4, $5, $6, $7, ""; }' | tee $shorttemp >> $report
-mv $shorttemp $shortrepo
+sort $shorttemp | \
+uniq | \
+    awk -v ban_ip="$ban_ip" allow_rules="$allow_rules" -v "format=$FORMAT" \
+        'NF>0  { if( match(ban_ip, " "$6" ")) $7="Ban";
+                 printf format, $1, $2, $3, $4, $5, $6, $7, ""; }' | tee $shortrepo >> $report
+debug_log $shortrepo "shortrepo"       # Debug logger
+rm -f $shorttemp
 sed -i 1i"$(printf $FORMAT $HEADER)" $shortrepo
 #column -t $shortrepo
+
+
+
+log "(end) SCAN $since_time to $now_time"

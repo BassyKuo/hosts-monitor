@@ -35,6 +35,14 @@ TAB=$(printf "\t")
 errmsg() {
     echo "FATAL: $1"
 }
+log() {
+    logger -t "$PROG" -p "local7.info" "$@"
+}
+debug_log() {
+    filename="$1"
+    note="${2:+"+${2}$TAB"}"
+    cat $filename | awk '{print "(DEBUG)'$note' "$0;}' | logger -t "$PROG" -p "local7.notice"
+}
 check_ip() {
     IP=$1
     echo $IP | grep '^[0-9]\{1,3\}\.\(\([0-9]\{1,3\}\.\)\{,2\}$\|\(\([0-9]\{1,3\}\.\)\{2\}[0-9]\{1,3\}$\)\)' > /dev/null && \
@@ -69,4 +77,3 @@ update_repo() {
                      printf format, $1, $2, $3, $4, $5, $6, $7, $8 }' | tee -a $report | \
     tee -a $shortrepo > /dev/null
 }
-
