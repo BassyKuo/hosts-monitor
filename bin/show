@@ -37,36 +37,34 @@ show_status() {
     case $1 in  #oneline
         yes)
             shift; shift;
-            show_status_oneline $*
+            show_status_oneline "$@"
             ;;
         *)
-            log_arg=$2; ip=$3
+            log_arg="$2"; ip="$3"
             shift; shift;
             printf "$BOLD%s$RESET\n"        "$1"                # ip: xxx.xxx.xxx.xxx
             printf "%-9s %s\n" "status:"    "$2"                # status: Ban(red) or Accept(green)
             printf "%-9s %s\n" "location:"  "$3"                # location: /etc/hosts.deny or /etc/hosts.allow or default
             shift; shift; shift;
             printf "%-9s %s\n" "comment:"   "$*"                # comment: description
-            show_ip_log $ip $log_arg
+            show_ip_log "$ip" "$log_arg"
             echo
             ;;
     esac
 }
 
 show_status_oneline() {
-    ip=$1
-    printf "%-20s%-20s" "$2" "$1"       # STATUS IP LOG
+    printf "%-20s%-20s" "$2" "$1"                               # STATUS IP LOG
     shift; shift; shift;
-    echo $*
-    #if grep --color=no "\s$ip\s" $report* | sed "s/^[^:]\+://g" | column -t | sort -r | head -n1 ; then echo "(none)"; fi
+    echo "$@"
 }
 
 show_ip_log() {
-    ip=$1
-    log_arg=$2
+    ip="$1"
+    log_arg="$2"
     (
-    printf "%-9s\n"    "log:"                           # log: login record in report
-    grep --color=no "\s$ip\s" $report* | sed "s/^[^:]\+://g" | column -t | awk '{printf "%-9s %s\n", "", $0}' | sort -r ) | \
+    printf "%-9s\n"    "log:"                                   # log: login record in report
+    grep -h --color=no "\s$ip\s" $report* | column -t | awk '{printf "%-9s %s\n", "", $0}' | sort -r ) | \
     (
     case $log_arg in
         yes|all)
@@ -87,26 +85,25 @@ show_ip_log() {
 }
 
 check_and_show_status() {
-    ip=$1
-    log_arg=$2
-    oneline=$3
+    log_arg="$2"
+    oneline="$3"
     if grep "\s$1\(\s\|$\)" $hosts_deny > /dev/null; then
         comment=$(grep -w "$1" $hosts_deny | sed -n 's/^[^#]*# *//; $p')
-        show_status $oneline $log_arg $1 "${RED}Ban$RESET" $hosts_deny $comment
+        show_status "$oneline" "$log_arg" "$1" "${RED}Ban$RESET" "$hosts_deny" "$comment"
 
     elif grep "\s$1\(\|$\)" $hosts_allow > /dev/null; then
         comment=$(grep -w "$1" $hosts_allow | sed -n 's/^[^#]*# *//; $p')
-        show_status $oneline $log_arg $1 "${GREEN}Accept$RESET" $hosts_allow $comment
+        show_status "$oneline" "$log_arg" "$1" "${GREEN}Accept$RESET" "$hosts_allow" "$comment"
 
     else
         if grep -w "$1[0-9.]\+" $hosts_deny > /dev/null; then
             printf "${YELLOW}Cannot match $RED$BOLD$1$RESET ${YELLOW}Find similar case ...$RESET\n"
             for ip in $(grep --color=no -w "$1[0-9.]\+" $hosts_deny | awk '{print $2}' | uniq); do
-                comment=$(grep -w "$ip[0-9.]\+" $hosts_deny | sed -n 's/^[^#]*# *//; $p')
-                show_status $oneline $log_arg $ip "${RED}Ban$RESET" $hosts_deny $comment
+                comment="$(grep -w "$ip" $hosts_deny | sed -n 's/^[^#]*# *//; $p')"
+                show_status "$oneline" "$log_arg" "$ip" "${RED}Ban$RESET" "$hosts_deny" "$comment"
             done
         else
-            show_status $oneline $log_arg $1 "${GREEN}Accept$RESET" "(default)" ""
+            show_status "$oneline" "$log_arg" "$1" "${GREEN}Accept$RESET" "(default)" ""
         fi
     fi
 }

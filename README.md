@@ -145,13 +145,16 @@ Welcome to raise the issue if you found bugs or have any problem when using this
 - [x] (ban) check `fail2ban` and unban
 - [x] (ban `-m`) enable to comment a **sentence**
 - [x] (rule `--check`) check the pattern status with current rules
-- [x] (service **BETA**) using `journalctl` to catch log
+- [x] (service) using `journalctl` to catch log
+- [ ] (service) add argument: BruteForce-Trying times
+- [x] (INSTALL,uninstall,profile,config) change report path, change install-directory path, add DEBUG mode
 
 ##### Bug fixing
 - [x] (ban) ban comment prompt ; unban bugs
 - [x] (hosts.deny) the comment prompt \`#' caused **error: /etc/hosts.deny, line 1577: bad option name: ....** warning message because of the symbol \`:' in the comment message
 - [x] (service) ban ips excluding \`refused connect from ...' in /var/log/auth.log
 - [x] (log) fix `-S` problem
+- [x] (show) comments in similiar case disappear
 
 #### r2.0.0
 - [x] Merge hosts-monitor & hosts-monitor.service (saved in `/opt/hosts-monitor`)
