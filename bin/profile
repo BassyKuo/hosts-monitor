@@ -23,7 +23,7 @@ sed -n '/^#.*/d; 1,/\[env\]/d; /\[\w\+\]/,$d; /^$/d; p' $CONFIG > $config_temp
 
 hosts_deny=/etc/hosts.deny
 hosts_allow=/etc/hosts.allow
-report=${REPORT_LOC:=/home}/hosts-monitor.report
+report=${REPORT_LOC:=$INSTALL_DIR}/hosts-monitor.report
 shortrepo=${REPORT_NEW:-/etc/ssh/sshd_banner}
 debug_mode=${DEBUG_MODE:-0}
 failed_passwd_retry=${PASSWD_RETRY:-2}

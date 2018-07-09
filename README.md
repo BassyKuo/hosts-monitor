@@ -16,7 +16,7 @@ The light service to manage suspicious hosts.  This repository contains:
     3. `ban`:       ban/unban specific ips manually (root only)
     4. `service`:   stop/start/restart `hosts-monitor-service` service (root only)
     5. `rule`:      set allow/deny rules to hosts-monitor-service
-    6. `stat` **BETA**:      statistics of ip (1) login times (2) login username (3) current status in report
+    6. `stat`:      statistics of ip (1) login times (2) login username (3) current status in report
 
 * **config** :
     the configure file including the report path, and allow/deny rules; split into 3 parts:
@@ -25,14 +25,16 @@ The light service to manage suspicious hosts.  This repository contains:
     [env]
     # some environment variables to define
     # default:
-    #   REPORT=/home/hosts-monitor.report
-    #   SUBREPO=/etc/ssh/sshd_banner
+    #   REPORT_LOC=/opt/hosts-monitor
+    #   REPORT_NEW=/etc/ssh/sshd_banner
+    #   DEBUG_MODE=0
+    #   PASSWD_RETRY=2
 
     [allow]
-    # some login rules always be ignored to ban
+    # login pattern always be ignored to ban
 
     [deny]
-    # some login rules for connection denied
+    # login pattern for connection denied
 
     ```
 
@@ -60,6 +62,7 @@ $ INSTALL_DIR=/opt/HM SERVICE=/etc/cron.daily ./INSTALL
 $ cd $INSTALL_DIR
 $ ./uninstall
 
+Backup reports ? [Y/n] n
 rm: remove 1 argument recursively? y
 Uninstall completely.
 ```
