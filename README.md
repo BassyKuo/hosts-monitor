@@ -1,6 +1,6 @@
 # Hosts-Monitor
 
-#### Version 2.1.0
+#### Version 2.1
 
 
 The light service to manage suspicious hosts.  This repository contains:
@@ -137,8 +137,8 @@ Welcome to raise the issue if you found bugs or have any problem when using this
 
 ---
 
-## TODO
-#### r2.1.0
+## r2.1.0
+
 ##### New features
 - [x] `stat` : summary the ip (1) login times (2) login username (3) current status in report
 - [x] (show) `--oneline`: show ip status in one-line
@@ -158,9 +158,3 @@ Welcome to raise the issue if you found bugs or have any problem when using this
 - [x] (service) ban ips excluding \`refused connect from ...' in /var/log/auth.log
 - [x] (log) fix `-S` problem
 - [x] (show) comments in similiar case disappear
-
-#### r2.0.0
-- [x] Merge hosts-monitor & hosts-monitor-service (saved in `/opt/hosts-monitor`)
-- [x] Ban-Rule add: username
-- [x] Always-Allow: ip @ /etc/hosts.allow
-- [x] show the /etc/hosts.deny status
