@@ -60,9 +60,14 @@ log "(start) SCAN $since_time to $now_time"
                 printf "ALL: %-18s # %s (Failed-Password<%s> login=%s)\n", $2, $3, $1, $4;}';
 
     # Deny-Rules
+    ( \
+    $query_cmd -t sshd --since="$since_time" --until="$now_time" | grep --color=no "sshd\[[0-9]\+\]: Failed password for [^ ]\+ from" | \
+        awk 'NF>0{  cmd="date +%F -d"$1$2; (cmd | getline date);
+                print date" "$3" sshd Failed-Password "$9" "$11" "}';
     $query_cmd -t sshd --since="$since_time" --until="$now_time" | grep --color=no "sshd\[[0-9]\+\]: Failed password for invalid user [^ ]\+ from" | \
         awk 'NF>0{  cmd="date +%F -d"$1$2; (cmd | getline date);
-                print date" "$3" sshd Invalid-User "$11" "$13" "}' | tee -a $shorttemp | \
+                print date" "$3" sshd Invalid-User "$11" "$13" "}' | tee -a $shorttemp
+    ) | \
         grep --color=no "$(echo $deny_rules | sed 's/ / \\| /g; s/^\(.*\)$/\\( \1 \\)/g')" | \
         awk '{  gsub(":","-",$0);
                 printf "ALL: %-18s # %s (DenyRule login=%s)\n", $6, $1"."$2, $5;}';
