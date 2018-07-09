@@ -2,9 +2,9 @@
 
 # Source      : /var/log/auth.log* , /var/log/fail2ban*
 # Destination : /etc/hosts.deny , /etc/hosts.allow
-# Report      : /home/hosts-monitor.report
+# Report      : /var/log/hosts-monitor/hosts-monitor.report
 
-# ==== /etc/crond.hourly/hosts-monitor-service @ 2018/5/22 by bassykuo <aaammmyyy27@gmail.com> ====
+# ==== /etc/crond.hourly/hosts-monitor-service @ 2018/7/9 by bassykuo <aaammmyyy27@gmail.com> ====
 
 INSTALL_DIR=/opt/hosts-monitor
 . ${install_dir:-$INSTALL_DIR}/bin/profile
@@ -48,13 +48,17 @@ log "(start) SCAN $since_time to $now_time"
 # ----------------------------------------------------------------------------------------------
 # Always ban: (1) Failed-Password (2) Invalid-User in DenyRules (3) Retry-IP (4) from Fail2Ban
 # ----------------------------------------------------------------------------------------------
+echo $failed_passwd_retry
 ( \
     # Failed-Password
     $query_cmd -t sshd --since="$since_time" --until="$now_time" | grep --color=no "sshd\[[0-9]\+\]: Failed password for [^ ]\+ from" | \
         awk 'NF>0{  cmd="date +%F -d"$1$2; (cmd | getline date);
                 print date" "$3" sshd Failed-Password "$9" "$11" "}' | tee -a $shorttemp | \
+        awk '{  printf "%-23s %s %s\n", $6, $1"."$2, $5; }' | \
+            sort | uniq -c -w21 | \
+            awk '($1 > '$failed_passwd_retry')' | \
         awk '{  gsub(":","-",$0);
-                printf "ALL: %-18s # %s (Failed-Password login=%s)\n", $6, $1"."$2, $5;}';
+                printf "ALL: %-18s # %s (Failed-Password<%s> login=%s)\n", $2, $3, $1, $4;}';
 
     # Deny-Rules
     $query_cmd -t sshd --since="$since_time" --until="$now_time" | grep --color=no "sshd\[[0-9]\+\]: Failed password for invalid user [^ ]\+ from" | \
@@ -77,10 +81,10 @@ log "(start) SCAN $since_time to $now_time"
     ## **DEPRECATED** -------------------------------------------------
     ##      `Ban from fail2ban` will be deprecated in the version 3.0.
     ## ----------------------------------------------------------------
-    zgrep "Ban" /var/log/fail2ban.log* | \
-        sed "s/^[^:]\+:\([^,]\+\),[0-9]\+ .* \(\([0-9]\+\.\)\{3\}[0-9]\+\)$/\1 \2/g" | \
-        awk '{  gsub(":","-",$0);
-                printf "ALL: %-18s # %s (Fail2ban)\n", $3, $1"."$2; }';
+    #zgrep "Ban" /var/log/fail2ban.log* | \
+        #sed "s/^[^:]\+:\([^,]\+\),[0-9]\+ .* \(\([0-9]\+\.\)\{3\}[0-9]\+\)$/\1 \2/g" | \
+        #awk '{  gsub(":","-",$0);
+                #printf "ALL: %-18s # %s (Fail2ban)\n", $3, $1"."$2; }';
 ) | \
     grep --color=no "\([0-9]\{1,3\}\.\)\{3\}[0-9]\{1,3\}" | \
     grep -v "$(echo $allow_rules | sed 's/ / \\| /g; s/^\(.*\)$/\\( \1 \\)/g')" | \

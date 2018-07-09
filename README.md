@@ -139,14 +139,14 @@ Welcome to raise the issue if you found bugs or have any problem when using this
 ##### New features
 - [x] `stat` : summary the ip (1) login times (2) login username (3) current status in report
 - [x] (show) `--oneline`: show ip status in one-line
-- [ ] (show) `--status`: show ban list (like `$ fail2ban-client status sshd` + tree)
+- [ ] ~~(show) `--status`: show ban list (like `$ fail2ban-client status sshd` + tree)~~
 - [x] (log) `--tmp`: print short-report
 - [x] (log) `--time <time1>,<time2>`: search time range <time1> to <time2>
 - [x] (ban) check `fail2ban` and unban
 - [x] (ban `-m`) enable to comment a **sentence**
 - [x] (rule `--check`) check the pattern status with current rules
 - [x] (service) using `journalctl` to catch log
-- [ ] (service) add argument: BruteForce-Trying times
+- [x] (service) add argument: BruteForce-Trying times
 - [x] (INSTALL,uninstall,profile,config) change report path, change install-directory path, add DEBUG mode
 
 ##### Bug fixing

@@ -6,9 +6,10 @@
 # Set location of the following items.
 # comment it if you wanna use default value.
 [env]
-REPORT_LOC=/var/log/hosts-monitor/                    # reports saved folder
-REPORT_NEW=/etc/ssh/sshd_banner                       # cache (hourly update)
-DEBUG_MODE=1                                          # 1: turn-on, 0: turn-off
+REPORT_LOC=/var/log/hosts-monitor/                    # reports saved folder                                        [default: /home]
+REPORT_NEW=/etc/ssh/sshd_banner                       # cache (hourly update)                                       [default: /etc/ssh/sshd_banner]
+DEBUG_MODE=1                                          # 1: turn-on, 0: turn-off                                     [default: 0]
+PASSWD_RETRY=5                                        # the number of 'Failed-Password' before a host get banned    [default: 2]
 
 
 # Any ip can be always accepted with the following pattern.

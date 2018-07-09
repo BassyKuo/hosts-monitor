@@ -26,6 +26,7 @@ hosts_allow=/etc/hosts.allow
 report=${REPORT_LOC:=/home}/hosts-monitor.report
 shortrepo=${REPORT_NEW:-/etc/ssh/sshd_banner}
 debug_mode=${DEBUG_MODE:-0}
+failed_passwd_retry=${PASSWD_RETRY:-2}
 
 UNDERLINE=$(tput smul)
 BOLD=$(tput bold)
