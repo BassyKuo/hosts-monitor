@@ -15,7 +15,6 @@ INSTALL_DIR=/opt/hosts-monitor
 shorttemp="$shortrepo.tmp"
 
 query_cmd='/bin/journalctl'
-fail2ban_cmd='/usr/bin/fail2ban-client'
 ban_list=`tempfile`
 since_time="`date -d'60 min ago' '+%F %T'`"
 now_time="`date '+%F %T'`"
@@ -45,9 +44,9 @@ refused_ip=`awk '{print $2}' $hosts_deny | grep --color=no "^[0-9]" | sort | uni
 log "(start) SCAN $since_time to $now_time"
 
 
-# ----------------------------------------------------------------------------------------------
-# Always ban: (1) Failed-Password (2) Invalid-User in DenyRules (3) Retry-IP (4) from Fail2Ban
-# ----------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------
+# Always ban: (1) Failed-Password > N (2) DenyRules (3) Retry-IP
+# ----------------------------------------------------------------
 ( \
     # Failed-Password
     $query_cmd -t sshd --since="$since_time" --until="$now_time" | grep --color=no "sshd\[[0-9]\+\]: Failed password for [^ ]\+ from" | \
