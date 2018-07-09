@@ -2,7 +2,7 @@
 
 # Custom subscript.
 # Usage:
-#     hosts-monitor service --help
+#     hosts-monitor-service --help
 #
 # Try 'hosts-monitor --help' for more information
 
@@ -17,25 +17,28 @@ show_help() {
     echo ""
     format="%s\t%s\t%s\n"
     ( \
-    printf $format "-a,start" "enable to run hosts-monitor.service daemon"
-    printf $format "-x,stop" "disable to run hosts-monitor.service daemon"
-    printf $format "-r,restart" "enable and execute the hosts-monitor.service"
+    printf $format "-a,start" "enable to run hosts-monitor-service daemon"
+    printf $format "-x,stop" "disable to run hosts-monitor-service daemon"
+    printf $format "-r,restart" "enable and execute the hosts-monitor-service"
     ) | column -t -s "$TAB" | awk '{print "   "$0}'
     echo ""
     exit 0
 }
 
 # ---[ Content
+case $1 in
+    "-h"|"--help"|"help")
+        show_help
+        exit 0
+        ;;
+esac
+
 if [ "$USER" != "root" ] ; then
     errmsg "You must be a root!"
     exit 0
 fi
 
 case $1 in
-    "-h"|"--help"|"help")
-        show_help
-        exit 0
-        ;;
     "-a"|"start")
         install_dir=$install_dir chmod +x $install_dir/$SERVICE_NAME
         ;;

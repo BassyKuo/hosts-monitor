@@ -48,7 +48,6 @@ log "(start) SCAN $since_time to $now_time"
 # ----------------------------------------------------------------------------------------------
 # Always ban: (1) Failed-Password (2) Invalid-User in DenyRules (3) Retry-IP (4) from Fail2Ban
 # ----------------------------------------------------------------------------------------------
-echo $failed_passwd_retry
 ( \
     # Failed-Password
     $query_cmd -t sshd --since="$since_time" --until="$now_time" | grep --color=no "sshd\[[0-9]\+\]: Failed password for [^ ]\+ from" | \

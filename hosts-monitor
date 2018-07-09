@@ -16,7 +16,7 @@ show_help() {
     printf $format "log" "access the report with pattern ($report)"
     printf $format "show" "show status of the specific ip"
     printf $format "ban,unban" "ban/unban ip" "[root]"
-    printf $format "service" "enable/disable/execute the hosts-monitor.service daemon" "[root]"
+    printf $format "service" "enable/disable/execute the hosts-monitor-service daemon" "[root]"
     printf $format "rule" "set allow/deny rules" "[root]"
     printf $format "stat" "summary the login information" "(BETA)"
     ) | column -t -s "$TAB" | awk '{print "   "$0}'

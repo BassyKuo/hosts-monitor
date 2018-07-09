@@ -5,7 +5,7 @@
 
 The light service to manage suspicious hosts.  This repository contains:
 
-* **[hosts-monitor.service](./service)** : 
+* **[hosts-monitor-service](./service)** : 
     the main service to ban the suspect per hour. 
 
 * **[hosts-monitor](./bin)** : 
@@ -14,8 +14,8 @@ The light service to manage suspicious hosts.  This repository contains:
     1. `log`:       list logs in hosts-monitor.report
     2. `show`:      show ips' status
     3. `ban`:       ban/unban specific ips manually (root only)
-    4. `service`:   stop/start/restart `hosts-monitor.service` service (root only)
-    5. `rule`:      set allow/deny rules to hosts-monitor.service
+    4. `service`:   stop/start/restart `hosts-monitor-service` service (root only)
+    5. `rule`:      set allow/deny rules to hosts-monitor-service
     6. `stat` **BETA**:      statistics of ip (1) login times (2) login username (3) current status in report
 
 * **config** :
@@ -40,7 +40,7 @@ The light service to manage suspicious hosts.  This repository contains:
 
 * **INSTALL** :
     * Default installation directory: `INSTALL_DIR=/opt/hosts-monitor`
-    * Default service path: `SERVICE=/etc/cron.hourly/hosts-monitor.service`
+    * Default service path: `SERVICE=/etc/cron.hourly/hosts-monitor-service`
 
 
 ## Setup
@@ -93,15 +93,15 @@ $ sudo hosts-monitor unban 2.2.2.2          # remove 2.2.2.2 from /etc/hosts.den
 $ hosts-monitor ban --help
 ```
 
-   4. control `hosts-monitor.service` [root only]
+   4. control `hosts-monitor-service` [root only]
 
 ```sh
-$ sudo hosts-monitor service stop       # disable hosts-monitor.service
-$ sudo hosts-monitor service restart    # enable hosts-monitor.service and run it
-$ hosts-monitor service --help
+$ sudo hosts-monitor-service stop       # disable hosts-monitor-service
+$ sudo hosts-monitor-service restart    # enable hosts-monitor-service and run it
+$ hosts-monitor-service --help
 ```
 
-   5. add allow/deny rules for `hosts-monitor.service` [root only]
+   5. add allow/deny rules for `hosts-monitor-service` [root only]
 
 ```sh
 $ sudo hosts-monitor rule --set-deny test user   # login with `test` or `user` will be rejected
@@ -157,7 +157,7 @@ Welcome to raise the issue if you found bugs or have any problem when using this
 - [x] (show) comments in similiar case disappear
 
 #### r2.0.0
-- [x] Merge hosts-monitor & hosts-monitor.service (saved in `/opt/hosts-monitor`)
+- [x] Merge hosts-monitor & hosts-monitor-service (saved in `/opt/hosts-monitor`)
 - [x] Ban-Rule add: username
 - [x] Always-Allow: ip @ /etc/hosts.allow
 - [x] show the /etc/hosts.deny status
