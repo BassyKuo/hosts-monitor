@@ -63,19 +63,23 @@ unban() {
 }
 
 # ---[ Content
-if [ "$USER" != "root" ] ; then
-    errmsg "You must be a root!"
-    exit 0
-fi
-
 choice="$1"
-
 shift;
 case $choice in
     "-h"|"--help"|"help")
         show_help
         ;;
     "ban"|"unban")
+        case $1 in
+            "-h"|"--help"|"help")
+                show_help
+                ;;
+        esac
+
+        if [ "$USER" != "root" ] ; then
+            errmsg "You must be a root!"
+            exit 0
+        fi
         while test $# -gt 0 ; do
             if [ "$1" = '-m' ] ; then comment="$2"; shift; shift;
             else ips="$ips $1"; shift; fi
