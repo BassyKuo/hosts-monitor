@@ -4,7 +4,7 @@
 # Destination : /etc/hosts.deny , /etc/hosts.allow
 # Report      : /var/log/hosts-monitor/hosts-monitor.report
 
-# ==== /etc/crond.hourly/hosts-monitor-service @ 2018/7/9 by bassykuo <aaammmyyy27@gmail.com> ====
+# ==== /etc/crond.hourly/hosts-monitor-service @ 2018/10/5 by bassykuo <aaammmyyy27@gmail.com> ====
 
 INSTALL_DIR=/opt/hosts-monitor
 . ${install_dir:-$INSTALL_DIR}/bin/profile
@@ -36,11 +36,16 @@ test -f $report || print_header >> $report
 
 rm -f $shorttemp
 fetch_rules
-refused_ip=`awk '{print $2}' $hosts_deny | grep --color=no "^[0-9]" | sort | uniq | awk '{print " "$0" "}'`
+#******************************************************
+# Remove it to fix the problem of `awk' long arguments
+#******************************************************
+#refused_ip=`awk '{print $2}' $hosts_deny | grep --color=no "^[0-9]" | sort | uniq | awk '{print " "$0" "}'`
 
 # ------------
 # System Log
 # ------------
+test $debug_mode -eq 1 && log "\$TERM=$TERM"       # Debug logger
+test $debug_mode -eq 1 && log "\$-=$-"             # Debug logger
 log "(start) SCAN $since_time to $now_time"
 
 
@@ -91,8 +96,8 @@ log "(start) SCAN $since_time to $now_time"
 ) | \
     grep --color=no "\([0-9]\{1,3\}\.\)\{3\}[0-9]\{1,3\}" | \
     grep -v "$(echo $allow_rules | sed 's/ / \\| /g; s/^\(.*\)$/\\( \1 \\)/g')" | \
-    awk -v refused_ip="$refused_ip" \
-        'NF>0  { if( ! match(refused_ip, " "$2" ")) print $0; }' | \
+    #awk -v refused_ip="$refused_ip" \
+        #'NF>0  { if( ! match(refused_ip, " "$2" ")) print $0; }' | \
     sort -k2,2 -n | uniq -w21 > $ban_list
 
 test $debug_mode -eq 1 && debug_log $ban_list "ban_list"       # Debug logger

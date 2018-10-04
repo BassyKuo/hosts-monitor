@@ -29,7 +29,9 @@ debug_mode=${DEBUG_MODE:-0}
 failed_passwd_retry=${PASSWD_RETRY:-2}
 
 # to check whether the shell was an interactive shell.
-if echo $- | grep '.*i.*' > /dev/null; then
+#echo "\$TERM=$TERM"
+#echo "\$-=$-"
+if echo $TERM | grep -i 'x' > /dev/null ; then
     UNDERLINE=$(tput smul)
     BOLD=$(tput bold)
     RED=$(tput setaf 1)
