@@ -1,6 +1,6 @@
 # Hosts-Monitor
 
-#### Version 2.1.0
+#### Version 2.1.2
 
 
 The light service to manage suspicious hosts.  This repository contains:
@@ -137,7 +137,12 @@ Welcome to raise the issue if you found bugs or have any problem when using this
 
 ---
 
-## TODO
+## VERSION ISSUES
+#### r2.1.2
+##### Bug fixing
+- [x] (profile) textcolor only works when $TERM=xterm
+- [x] (hosts-monitor-service) remove `$refused_ip` to avoid the too long argument in `awk`
+
 #### r2.1.0
 ##### New features
 - [x] `stat` : summary the ip (1) login times (2) login username (3) current status in report
