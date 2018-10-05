@@ -44,8 +44,8 @@ fetch_rules
 # ------------
 # System Log
 # ------------
-test $debug_mode -eq 1 && log "\$TERM=$TERM"       # Debug logger
-test $debug_mode -eq 1 && log "\$-=$-"             # Debug logger
+#test $debug_mode -eq 1 && log "\$TERM=$TERM"       # Debug logger
+#test $debug_mode -eq 1 && log "\$-=$-"             # Debug logger
 log "(start) SCAN $since_time to $now_time"
 
 
